@@ -1,0 +1,28 @@
+Student Name: Anna
+Academic Program: Physics Major, Mathematics Minor
+Semester: Fall 2025
+
+Major Requirements:
+
+PHY-101: Classical Mechanics
+
+PHY-220: Electromagnetism
+
+PHY-300: Introduction to Quantum Mechanics
+
+Minor Requirements:
+
+MTH-110: Calculus I
+
+MTH-215: Linear Algebra
+
+MTH-300: Differential Equations
+
+Elective Courses:
+
+CSC-101: Introduction to Programming (Computer Science Department)
+
+BUS-400: Corporate Strategy and Policy (Business Department)
+
+Total Credit Load: 8 courses
+Academic Focus: Intensive major/minor completion with additional skill development

@@ -1,0 +1,26 @@
+Student Name: Leo
+Academic Program: Economics Major, International Business Minor
+Semester: Fall 2025
+
+Major Requirements:
+
+ECO-101: Principles of Microeconomics
+
+ECO-220: Intermediate Macroeconomics
+
+Minor Requirements:
+
+IB-400: International Business Strategy
+
+Elective Courses:
+
+MTH-215: Linear Algebra (Mathematics Department)
+
+MKT-205: Principles of Marketing (Marketing Department)
+
+CHM-101: General Chemistry I (Chemistry Department)
+
+BUS-101: Introduction to Business Administration (Business Department)
+
+Total Credit Load: 7 courses
+Academic Focus: Diversified exploration across multiple departments
