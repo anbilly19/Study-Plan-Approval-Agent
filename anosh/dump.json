@@ -686,7 +686,14 @@
         ], usage_metadata={'input_tokens': 9297, 'output_tokens': 134, 'total_tokens': 9431
         }), ToolMessage(content="Returning structured response: scheduling_score=80 alignment_score=90 weighted_color='green' scheduling_reasoning='The schedule is manageable but has some potential conflicts.' alignment_reasoning='The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.' overall_recommendation='The student should consider dropping CHM-101 and focusing on core courses.' workload_score=90", name='StudyPlanEvaluation', id='a48a34b5-bcf9-4cd0-85ac-1b2ca1e9d26e', tool_call_id='q1je116yx')
     ], 
-    'structured_response': StudyPlanEvaluation(scheduling_score=80, alignment_score=90, weighted_color='green', scheduling_reasoning='The schedule is manageable but has some potential conflicts.', alignment_reasoning='The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.', overall_recommendation='The student should consider dropping CHM-101 and focusing on core courses.', workload_score=90), '__interrupt__': [Interrupt(value={'action_requests': [
+    'structured_response': StudyPlanEvaluation(
+    scheduling_score=80,
+     alignment_score=90, 
+     weighted_color='green', 
+     scheduling_reasoning='The schedule is manageable but has some potential conflicts.', 
+     alignment_reasoning='The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.', overall_recommendation='The student should consider dropping CHM-101 and focusing on core courses.',
+      workload_score=90),
+       '__interrupt__': [Interrupt(value={'action_requests': [
                 {'name': 'weighted_score_tool_with_interrupt', 'args': {'alignment_score': 90, 'scheduling_score': 80, 'workload_score': 90
                     }, 'description': "Tool execution requires approval\n\nTool: weighted_score_tool_with_interrupt\nArgs: {'alignment_score': 90, 'scheduling_score': 80, 'workload_score': 90}"
                 }
