@@ -1,9 +1,9 @@
-# ── Stages
+# ── Stages ─────────────────────────────────────────────────────────────────────
 stages:
   - test
   - secret-detection
 
-# ── Include GitLab security templates 
+# ── Include GitLab security templates ──────────────────────────────────────────
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
@@ -12,7 +12,7 @@ include:
 variables:
   SECRET_DETECTION_ENABLED: "true"
 
-# ── Job overrides (minimal + safe) 
+# ── Job overrides (minimal + safe) ─────────────────────────────────────────────
 # The SAST job is created by the template and already runs in the `test` stage,
 # so we don't need to redefine it. We only move Secret Detection to its own stage.
 
