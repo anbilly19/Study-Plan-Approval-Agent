@@ -1,0 +1,4 @@
+Given a study plan: {study_plan}
+Analyze selection of courses for the semester using the course_description and course_masterlist table and student's major/minor.
+Score out of 100. Assessment must account for one exploratory course.
+Explain your score briefly.

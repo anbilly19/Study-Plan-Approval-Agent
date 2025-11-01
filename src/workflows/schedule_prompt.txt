@@ -1,0 +1,8 @@
+Given a Study Plan: {study_plan}
+To extract semester schedule details for each selected course, use the exams, and lectures tables.
+Evaluate when lectures, exercises, and exams occur for selected courses.
+Score out of 100 based on:
+- Breaks (<1hr) between lectures/exercises
+- Exams too close (<3 days)
+- Overlaps/conflicts not tolerated
+Explain your score briefly.
