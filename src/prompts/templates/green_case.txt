@@ -1,0 +1,18 @@
+Name: Maria
+Major: Computer Science
+Minor: Business Administration
+Courses Selected:
+
+CSC-101: Introduction to Programming
+
+CSC-250: Data Structures and Algorithms
+
+CSC-310: Database Systems
+
+MTH-110: Calculus I
+
+BUS-101: Introduction to Business Administration
+
+BUS-310: Operations Management
+
+HRM-200: Human Resource Management
