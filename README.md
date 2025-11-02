@@ -17,3 +17,8 @@
 | **apps/api/**              | FastAPI backend for agent access via HTTP endpoints.           |
 | **src/tests/**             | Unit and integration tests.                                    |
 | **README.md**              | This file.                                                     |
+
+
+Built with Python 3.11.6
+
+Please ensure that you have a Python version that is 3.10+
