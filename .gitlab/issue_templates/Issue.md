@@ -29,4 +29,3 @@ _Provide details about where the issue occurs._
 
 ## Additional Information
 _Attach or paste screenshots, videos, or logs if relevant._
-
