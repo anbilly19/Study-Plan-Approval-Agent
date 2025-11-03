@@ -14,28 +14,28 @@ MTH-215: Linear Algebra
 
 MTH-300: Differential Equations
 
-CSC-101: Introduction to Programming 
+CSC-101: Introduction to Programming
 
-CSC-250: Data Structures and Algorithms 
+CSC-250: Data Structures and Algorithms
 
-CSC-310: Database Systems 
+CSC-310: Database Systems
 
-CHM-101: General Chemistry I 
+CHM-101: General Chemistry I
 
-CHM-250: Organic Chemistry I 
+CHM-250: Organic Chemistry I
 
-ECO-101: Principles of Microeconomics 
+ECO-101: Principles of Microeconomics
 
-ECO-220: Intermediate Macroeconomics 
+ECO-220: Intermediate Macroeconomics
 
-BUS-400: Corporate Strategy and Policy 
+BUS-400: Corporate Strategy and Policy
 
-FIN-210: Corporate Finance 
+FIN-210: Corporate Finance
 
 MKT-205: Principles of Marketing
 
-STA-150: Introduction to Statistics 
+STA-150: Introduction to Statistics
 
-HRM-200: Human Resource Management 
+HRM-200: Human Resource Management
 
-IB-400: International Business Strategy 
+IB-400: International Business Strategy

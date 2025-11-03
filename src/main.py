@@ -1,23 +1,25 @@
-import os
-from agents.study_eval_agent import EvalAgents
-from agents.main_agent import create_main_agent, create_interrupt_main_agent
+"""Main entry point for running the study plan evaluation with optional HITL."""
 
+import getpass
+import os
+import warnings
+from pprint import pprint
+
+from dotenv import load_dotenv
+from pydantic.json_schema import PydanticJsonSchemaWarning
+
+from agents.main_agent import create_interrupt_main_agent, create_main_agent
+from agents.study_eval_agent import EvalAgents
 from hitl.eval_interrupt import run_hitl_evaluation
 from prompts.prompt import (
-    main_agent_prompt,
-    interrupt_agent_prompt,
-    red_case,
-    yellow_case,
-    green_case,
-    scheduling_prompt,
     alignment_prompt,
+    green_case,
+    interrupt_agent_prompt,
+    main_agent_prompt,
+    scheduling_prompt,
+    yellow_case,
 )
 from tools import DatabaseTool
-from pprint import pprint
-import getpass
-import warnings
-from pydantic.json_schema import PydanticJsonSchemaWarning
-from dotenv import load_dotenv
 
 # To suppress all PydanticJsonSchemaWarning warnings
 warnings.filterwarnings("ignore", category=PydanticJsonSchemaWarning)
@@ -26,7 +28,6 @@ api_key = os.getenv("GROQ_API_KEY")
 
 
 if not api_key:
-    import getpass
 
     api_key = getpass.getpass("Enter your Groq API key: ")
 
@@ -75,8 +76,6 @@ if __name__ == "__main__":
         evaluation = run_hitl_evaluation(main_agent, yellow_case)
         pprint(evaluation)
     else:
-        main_agent = create_main_agent(
-            eval_agents, model_name=llama_70b, main_agent_prompt=main_agent_prompt
-        )
+        main_agent = create_main_agent(eval_agents, model_name=llama_70b, main_agent_prompt=main_agent_prompt)
         evaluation = run_evaluation(main_agent, green_case)
         pprint(evaluation["structured_response"].model_dump())
