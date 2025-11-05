@@ -12,8 +12,6 @@ npm (Node Package Manager)
 Navigate to the project root directory and install all required packages:
 
 npm install
-# or
-yarn install
 
 
 3. Start the Development Server
