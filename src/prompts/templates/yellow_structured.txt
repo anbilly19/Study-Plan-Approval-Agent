@@ -1,6 +1,7 @@
 Student Name: Leo
-Academic Program: Economics Major, International Business Minor
-Semester: Fall 2025
+Minor: International Business 
+Major: Economics 
+Course Selected:
 
 ECO-101: Principles of Microeconomics
 
@@ -8,10 +9,14 @@ ECO-220: Intermediate Macroeconomics
 
 IB-400: International Business Strategy
 
-MTH-215: Linear Algebra (Mathematics Department)
+MKT-300: Consumer Behavior
 
-MKT-205: Principles of Marketing (Marketing Department)
+MTH-215: Linear Algebra 
 
-CHM-101: General Chemistry I (Chemistry Department)
+FIN-210: Corporate Finance
 
-BUS-101: Introduction to Business Administration (Business Department)
+MKT-205: Principles of Marketing 
+
+CHM-101: General Chemistry I 
+
+BUS-101: Introduction to Business Administration 

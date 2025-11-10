@@ -11,12 +11,18 @@ from pprint import pprint
 from agents.main_agent import create_interrupt_main_agent, create_main_agent
 from agents.study_eval_agent import EvalAgents
 from hitl.eval_interrupt import run_hitl_evaluation
+from env_setup import setup_langsmith_env
 from prompts.prompt import (
+    alignment_prompt_text,
     alignment_prompt,
     green_case,
+    synth_prompt,
+    red_case,
     interrupt_agent_prompt,
     main_agent_prompt,
+    scheduling_prompt_text,
     scheduling_prompt,
+    synth_prompt_interrupt,
     yellow_case,
 )
 from tools import DatabaseTool
@@ -27,7 +33,7 @@ load_dotenv()
 
 LLAMA_70B = "llama-3.3-70b-versatile"
 LLAMA_8B = "llama-3.1-8b-instant"
-CONTEXT_PARENT = f"{os.getcwd()}/context_tables"
+CONTEXT_PARENT = f"{os.getcwd()}/src/context_tables"
 
 # global cache so API can reuse without rebuilding
 _eval_agents: Optional[EvalAgents] = None
@@ -82,19 +88,21 @@ def evaluate_study_plan(
     eval_agents = init_eval_agents(model_name=model_name)
 
     if hitl:
-        chain = create_interrupt_main_agent(
+        chain, synth = create_interrupt_main_agent(
             eval_agents,
             model_name=model_name,
             interrupt_agent_prompt=interrupt_agent_prompt,
+            synth_prompt=synth_prompt_interrupt
         )
         plan_text = yellow_case if use_examples else study_plan
-        return run_hitl_evaluation(chain, plan_text)
+        return run_hitl_evaluation(chain, plan_text, synth)
 
     # non-HITL
     chain = create_main_agent(
         eval_agents,
         model_name=model_name,
         main_agent_prompt=main_agent_prompt,
+        synth_prompt=synth_prompt
     )
     plan_text = green_case if use_examples else study_plan
     return run_evaluation(chain, plan_text)
@@ -103,24 +111,16 @@ def evaluate_study_plan(
 # ------------- CLI behavior preserved -------------
 if __name__ == "__main__":
     # CLI-only: allow entering key interactively (avoid this during imports)
-    import getpass
-
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        api_key = getpass.getpass("Enter your Groq API key: ")
-        with open(".env", "a") as f:
-            f.write(f"\nGROQ_API_KEY={api_key}")
-        os.environ["GROQ_API_KEY"] = api_key
+    setup_langsmith_env()
 
     hitl = True  # keep your original toggle
 
     if hitl:
-        out = evaluate_study_plan(study_plan=yellow_case, hitl=True, use_examples=True)
-        pprint(out)
+        out = evaluate_study_plan(study_plan=green_case, hitl=True)
     else:
-        out = evaluate_study_plan(study_plan=green_case, hitl=False, use_examples=True)
+        out = evaluate_study_plan(study_plan=green_case, hitl=False)
         # if it's a pydantic model with structured_response, you can still dump it:
-        try:
-            pprint(out["structured_response"].model_dump())
-        except Exception:
-            pprint(out)
+    try:
+        pprint(out["structured_response"].model_dump())
+    except Exception:
+        pprint(out)
