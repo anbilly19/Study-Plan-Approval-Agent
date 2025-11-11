@@ -853,6 +853,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+def call_course_api(timeout_sec: int = 6):
+    try:
+        r3 = requests.get(COURSE_URL, timeout=timeout_sec)
+        try:
+            post_body = r3.json()
+        except Exception:
+            post_body = r3.text
+        post_result = {"ok": r3.ok, "status_code": r3.status_code, "body": post_body}
+    except Exception as e:
+        post_result = {"ok": False, "error": str(e)}
+    return post_result
+
+
 api_response = fetch_all_cases()
 if api_response.get("ok") and api_response.get("body"):
     all_cases = api_response["body"]
