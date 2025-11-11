@@ -168,7 +168,7 @@ logs/
 nohup.out
 
 # --- Temporary / Data Files ---
-data/
+data/dev.db
 datasets/
 tmp/
 temp/
@@ -205,4 +205,3 @@ Desktop.ini
 *.lock
 *.log.old
 *.orig
-data/dev.db
