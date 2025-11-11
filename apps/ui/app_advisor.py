@@ -12,6 +12,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+# API endpoints
+HEALTH_URL = "http://127.0.0.1:8000/health"
+APPROVAL_URL = "http://127.0.0.1:8000/approval"
+COURSE_URL = "http://127.0.0.1:8000/courses"
 
 # Global CSS
 st.markdown(
@@ -237,8 +241,22 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+def call_course_api(timeout_sec: int = 6):
+    try:
+        r3 = requests.get(COURSE_URL, timeout=timeout_sec)
+        try:
+            post_body = r3.json()
+        except Exception:
+            post_body = r3.text
+        post_result = {"ok": r3.ok, "status_code": r3.status_code, "body": post_body}
+    except Exception as e:
+        post_result = {"ok": False, "error": str(e)}
+    return post_result
+
+
 # Sample course data
-courses_data = {
+fallback_courses_data = {
     "Computer Science": [
         {
             "code": "CS 101",
@@ -336,6 +354,13 @@ courses_data = {
         },
     ],
 }
+
+api_result = call_course_api()
+if api_result.get("ok") and api_result.get("body"):
+    courses_data = api_result["body"]["courses"]
+else:
+    print("Using fallback course data due to API error:", api_result.get("error"))
+    courses_data = fallback_courses_data
 
 # Stats section
 total_credits = sum(course["credits"] for course in st.session_state.selected_courses)
@@ -435,10 +460,6 @@ for dept in departments_to_show:
                     st.session_state.selected_courses.remove(course)
                     st.rerun()
 
-# API endpoints
-HEALTH_URL = "http://127.0.0.1:8000/health"
-POST_URL = "http://127.0.0.1:8000/approval"
-
 
 # Payload builder
 def build_payload():
@@ -471,7 +492,7 @@ def call_fastapi_health_and_post(payload: dict, timeout_sec: int = 6):
     except Exception as e:
         health_result = {"ok": False, "error": str(e)}
     try:
-        r2 = requests.post(POST_URL, json=payload, timeout=timeout_sec)
+        r2 = requests.post(APPROVAL_URL, json=payload, timeout=timeout_sec)
         try:
             post_body = r2.json()
         except Exception:
