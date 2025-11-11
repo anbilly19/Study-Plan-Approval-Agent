@@ -205,3 +205,4 @@ Desktop.ini
 *.lock
 *.log.old
 *.orig
+data/dev.db
