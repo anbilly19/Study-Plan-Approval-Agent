@@ -16,3 +16,6 @@ pydantic-ai==1.2.1
 pydantic_core==2.33.2
 python-dotenv==1.2.1
 pre_commit==4.3.0
+uvicorn==0.38.0
+fastapi==0.121.1
+streamlit==1.51.0
