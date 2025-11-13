@@ -1,33 +1,33 @@
-# ── Stages ─────────────────────────────────────────────────────────────────────
-stages:
-  - test
-  - secret-detection
+# # ── Stages ─────────────────────────────────────────────────────────────────────
+# stages:
+#   - test
+#   - secret-detection
 
-# ── Include GitLab security templates ──────────────────────────────────────────
-include:
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Secret-Detection.gitlab-ci.yml
+# # ── Include GitLab security templates ──────────────────────────────────────────
+# include:
+#   - template: Security/SAST.gitlab-ci.yml
+#   - template: Security/Secret-Detection.gitlab-ci.yml
 
-# ── Global variables (optional; Secret Detection will run without this, but ok) ─
-variables:
-  SECRET_DETECTION_ENABLED: "true"
+# # ── Global variables (optional; Secret Detection will run without this, but ok) ─
+# variables:
+#   SECRET_DETECTION_ENABLED: "true"
 
-# ── Job overrides (minimal + safe) ─────────────────────────────────────────────
-# The SAST job is created by the template and already runs in the `test` stage,
-# so we don't need to redefine it. We only move Secret Detection to its own stage.
+# # ── Job overrides (minimal + safe) ─────────────────────────────────────────────
+# # The SAST job is created by the template and already runs in the `test` stage,
+# # so we don't need to redefine it. We only move Secret Detection to its own stage.
 
-secret_detection:
-  stage: secret-detection
-  # If your runner requires tags, uncomment and set them:
-  # tags: [docker]
-  rules:
-    # Run on merge requests and branch pushes (adjust as needed)
-    - if: '$CI_MERGE_REQUEST_ID'
-    - if: '$CI_COMMIT_BRANCH'
+# secret_detection:
+#   stage: secret-detection
+#   # If your runner requires tags, uncomment and set them:
+#   # tags: [docker]
+#   rules:
+#     # Run on merge requests and branch pushes (adjust as needed)
+#     - if: '$CI_MERGE_REQUEST_ID'
+#     - if: '$CI_COMMIT_BRANCH'
 
-# (Optional) Example rules for SAST, matching the above behavior:
-sast:
-  rules:
-    - if: '$CI_MERGE_REQUEST_ID'
-    - if: '$CI_COMMIT_BRANCH'
-  # tags: [docker]   # uncomment if your runner needs tags
+# # (Optional) Example rules for SAST, matching the above behavior:
+# sast:
+#   rules:
+#     - if: '$CI_MERGE_REQUEST_ID'
+#     - if: '$CI_COMMIT_BRANCH'
+#   # tags: [docker]   # uncomment if your runner needs tags
