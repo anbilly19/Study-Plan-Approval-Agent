@@ -1,4 +1,6 @@
 Given a study plan: {study_plan}
 Analyze selection of courses for the semester using the course_description and course_masterlist table and student's major/minor.
-Score out of 100. Assessment must account for one exploratory course.
-Explain your score briefly.
+The template for a query should be "course_id.str.contains('Course-#|Course-#|Course-#')" for both tables
+Replace <Course-#> with all every course_id found in the plan.
+Score out of 100.
+The courses must strongly align with the Major and Minor of the student be strict in your evaluation.

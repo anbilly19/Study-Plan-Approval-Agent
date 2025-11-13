@@ -1,41 +1,26 @@
-Student Name: Anna
-Academic Program: Physics Major, Mathematics Minor
-Semester: Fall 2025
+Student name: Anna
+Major: Physics
+Minor: Mathematics
+Courses selected:
 
 PHY-101: Classical Mechanics
 
-PHY-220: Electromagnetism
-
-PHY-300: Introduction to Quantum Mechanics
-
 MTH-110: Calculus I
-
-MTH-215: Linear Algebra
-
-MTH-300: Differential Equations
 
 CSC-101: Introduction to Programming
 
-CSC-250: Data Structures and Algorithms
-
-CSC-310: Database Systems
-
 CHM-101: General Chemistry I
-
-CHM-250: Organic Chemistry I
 
 ECO-101: Principles of Microeconomics
 
-ECO-220: Intermediate Macroeconomics
-
 BUS-400: Corporate Strategy and Policy
 
-FIN-210: Corporate Finance
+FIN-410: Advanced Corporate Finance
 
 MKT-205: Principles of Marketing
-
-STA-150: Introduction to Statistics
 
 HRM-200: Human Resource Management
 
 IB-400: International Business Strategy
+
+STA-150: Introduction to Statistics
