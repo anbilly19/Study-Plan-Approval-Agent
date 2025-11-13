@@ -9,8 +9,6 @@ CSC-250: Data Structures and Algorithms
 
 CSC-310: Database Systems
 
-MTH-110: Calculus I
-
 BUS-101: Introduction to Business Administration
 
 BUS-310: Operations Management
