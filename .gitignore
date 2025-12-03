@@ -138,7 +138,6 @@ dist/
 .langchain/
 .llm_cache/
 .cache/
-*.db
 *.sqlite3
 vector_store/
 chroma/

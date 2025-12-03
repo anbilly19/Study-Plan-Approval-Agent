@@ -1,7 +1,13 @@
 import json
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+# # Add the project root to the Python path
+# project_root = Path(__file__).parent.parent.parent
+# sys.path.insert(0, str(project_root))
+from src.db.queries import fetch_cases, fetch_courses, save_approval_to_db, update_case_status
 
 app = FastAPI()
 
@@ -14,10 +20,15 @@ app.add_middleware(
 )
 
 
+class StatusUpdate(BaseModel):
+    status: str  # "Approved" or "Rejected"
+    notes: str | None = None
+
+
 @app.get("/health")
 def health_check():
     print("Health check endpoint called")
-    return {"status": "healthy"}
+    return {"decision": "yellow"}
 
 
 @app.post("/approval")
@@ -25,6 +36,9 @@ async def approval_endpoint(request: Request):
     try:
         data = await request.json()
         print(json.dumps(data, indent=4))
+        inserted_rows = save_approval_to_db(data)
+        print(inserted_rows, "rows inserted/updated in the database")
+
         return {"message": "Approval data received", "received_items": len(data.get("courses", []))}
     except Exception as e:
         print("Error while reading JSON:", e)
@@ -34,102 +48,47 @@ async def approval_endpoint(request: Request):
 @app.get("/courses")
 def get_courses():
     print("Courses endpoint called")
-    courses_data = {
-        "Computer Science": [
-            {
-                "code": "CS 101",
-                "name": "Introduction to Programming",
-                "credits": 3,
-                "time": "MWF 9:00-10:00 AM",
-                "professor": "Dr. Johnson",
-                "seats": 45,
-            },
-            {
-                "code": "CS 201",
-                "name": "Data Structures",
-                "credits": 4,
-                "time": "TTh 11:00-12:30 PM",
-                "professor": "Dr. Smith",
-                "seats": 35,
-            },
-            {
-                "code": "CS 301",
-                "name": "Algorithms",
-                "credits": 4,
-                "time": "MWF 2:00-3:00 PM",
-                "professor": "Dr. Lee",
-                "seats": 28,
-            },
-            {
-                "code": "CS 350",
-                "name": "Database Systems",
-                "credits": 3,
-                "time": "TTh 1:00-2:30 PM",
-                "professor": "Dr. Garcia",
-                "seats": 30,
-            },
-        ],
-        "Mathematics": [
-            {
-                "code": "MATH 101",
-                "name": "Calculus I",
-                "credits": 4,
-                "time": "MWF 10:00-11:00 AM",
-                "professor": "Dr. Brown",
-                "seats": 50,
-            },
-            {
-                "code": "MATH 201",
-                "name": "Calculus II",
-                "credits": 4,
-                "time": "TTh 9:00-10:30 AM",
-                "professor": "Dr. Wilson",
-                "seats": 42,
-            },
-            {
-                "code": "MATH 250",
-                "name": "Linear Algebra",
-                "credits": 3,
-                "time": "MWF 1:00-2:00 PM",
-                "professor": "Dr. Martinez",
-                "seats": 38,
-            },
-        ],
-        "Physics": [
-            {
-                "code": "PHYS 101",
-                "name": "General Physics I",
-                "credits": 4,
-                "time": "TTh 2:00-3:30 PM",
-                "professor": "Dr. Anderson",
-                "seats": 40,
-            },
-            {
-                "code": "PHYS 201",
-                "name": "General Physics II",
-                "credits": 4,
-                "time": "MWF 11:00-12:00 PM",
-                "professor": "Dr. Taylor",
-                "seats": 35,
-            },
-        ],
-        "English": [
-            {
-                "code": "ENG 101",
-                "name": "English Composition",
-                "credits": 3,
-                "time": "TTh 10:00-11:30 AM",
-                "professor": "Dr. Davis",
-                "seats": 25,
-            },
-            {
-                "code": "ENG 201",
-                "name": "Literature Analysis",
-                "credits": 3,
-                "time": "MWF 3:00-4:00 PM",
-                "professor": "Dr. Moore",
-                "seats": 30,
-            },
-        ],
-    }
+    courses_data = fetch_courses()
     return {"courses": courses_data}
+
+
+@app.get("/admin/cases")
+def get_cases():
+    print("Cases endpoint called")
+    return fetch_cases()
+
+
+@app.patch("/admin/cases/{case_id}/status")
+async def update_case_status_endpoint(case_id: str, payload: StatusUpdate):
+    try:
+        # Normalise / validate status label if needed
+        new_status = payload.status.strip().capitalize()  # "approved" → "Approved"
+        notes = payload.notes
+
+        updated_rows = update_case_status(case_id, new_status, notes)
+
+        if updated_rows == 0:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No pending rows found for case_id '{case_id}'",
+            )
+
+        return {
+            "message": "Case status updated successfully",
+            "case_id": case_id,
+            "new_status": new_status,
+            "updated_rows": updated_rows,
+        }
+
+    except ValueError as ve:
+        # invalid status etc.
+        raise HTTPException(status_code=400, detail=str(ve))
+
+    except HTTPException:
+        # re-raise cleanly
+        raise
+
+    except Exception as e:
+        # fallback
+        print("Error while updating case status:", e)
+        raise HTTPException(status_code=500, detail="Internal server error")

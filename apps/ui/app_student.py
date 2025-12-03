@@ -1,9 +1,11 @@
+import os
 import random
 from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
 import streamlit as st
+from dotenv import load_dotenv
 
 # Page configuration
 st.set_page_config(
@@ -13,24 +15,97 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 # API endpoints
-HEALTH_URL = "http://127.0.0.1:8000/health"
-APPROVAL_URL = "http://127.0.0.1:8000/approval"
-COURSE_URL = "http://127.0.0.1:8000/courses"
+load_dotenv()
+API_BASE_URL = os.getenv("API_BASE_URL")
+HEALTH_URL = f"{API_BASE_URL}/health"
+APPROVAL_URL = f"{API_BASE_URL}/approval"
+COURSE_URL = f"{API_BASE_URL}/courses"
 
 # Global CSS
 st.markdown(
     """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* THEME VARIABLES: LIGHT AS DEFAULT */
+    :root {
+        color-scheme: light dark; /* let browser know we support both */
+
+        /* backgrounds */
+        --kk-body-bg: linear-gradient(135deg, #f3f4ff 0%, #eef2ff 30%, #f9fafb 100%);
+        --kk-card-bg: rgba(255, 255, 255, 0.96);
+        --kk-card-border: rgba(148, 163, 184, 0.6);
+        --kk-hero-overlay: linear-gradient(
+            180deg,
+            rgba(129, 140, 248, 0.10) 0%,
+            transparent 100%
+        );
+
+        /* text */
+        --kk-text-main: #111827;
+        --kk-text-muted: #6b7280;
+        --kk-text-soft: #9ca3af;
+
+        /* inputs */
+        --kk-input-bg: rgba(249, 250, 251, 0.9);
+        --kk-input-border: rgba(156, 163, 175, 0.9);
+
+        /* dataframe / table */
+        --kk-table-bg: rgba(255, 255, 255, 0.98);
+        --kk-table-header-bg: #e5e7eb;
+
+        /* alerts */
+        --kk-alert-bg: rgba(249, 250, 251, 0.96);
+        --kk-alert-border: rgba(156, 163, 175, 0.9);
+    }
+
+    /*  DARK OVERRIDES  */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --kk-body-bg: linear-gradient(135deg, #020617 0%, #020617 25%, #111827 100%);
+            --kk-card-bg: rgba(15, 23, 42, 0.96);
+            --kk-card-border: rgba(148, 163, 184, 0.5);
+            --kk-hero-overlay: linear-gradient(
+                180deg,
+                rgba(129, 140, 248, 0.20) 0%,
+                transparent 100%
+            );
+
+            --kk-text-main: #f9fafb;
+            --kk-text-muted: #d1d5db;
+            --kk-text-soft: #9ca3af;
+
+            --kk-input-bg: rgba(15, 23, 42, 0.9);
+            --kk-input-border: rgba(148, 163, 184, 0.8);
+
+            --kk-table-bg: rgba(15, 23, 42, 0.98);
+            --kk-table-header-bg: #020617;
+
+            --kk-alert-bg: rgba(15, 23, 42, 0.96);
+            --kk-alert-border: rgba(148, 163, 184, 0.9);
+        }
+    }
+
     * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-    .stApp { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
+
+    /* MAIN APP BACKGROUND + BASE TEXT */
+    .stApp {
+        background: var(--kk-body-bg) !important;
+        color: var(--kk-text-main) !important;
+    }
+
+    .block-container {
+        background: transparent !important;
+        color: var(--kk-text-main) !important;
+    }
 
     #MainMenu, footer, header { visibility: hidden; }
 
+    /* HERO */
     .hero-section {
         text-align: center;
         padding: 100px 20px 80px;
-        background: linear-gradient(180deg, rgba(138, 43, 226, 0.12) 0%, transparent 100%);
+        background: var(--kk-hero-overlay);
         border-radius: 20px;
         margin: 20px 0 40px;
     }
@@ -38,74 +113,186 @@ st.markdown(
         font-size: 72px;
         font-weight: 700;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin-bottom: 20px; line-height: 1.2;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        line-height: 1.2;
     }
-    .hero-subtitle { font-size: 24px; color: #a0a0a0; font-weight: 300; margin-bottom: 40px; }
+    .hero-subtitle {
+        font-size: 24px;
+        color: var(--kk-text-soft);
+        font-weight: 300;
+        margin-bottom: 40px;
+    }
 
+    /* CARDS */
     .feature-card, .course-card, .login-card {
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--kk-card-bg);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--kk-card-border);
         border-radius: 20px;
         padding: 40px;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
+        color: var(--kk-text-main);
     }
+
     .feature-card::before, .course-card::before, .login-card::before {
         content: '';
-        position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
         background: linear-gradient(90deg, #667eea, #764ba2);
-        opacity: 0; transition: opacity 0.3s ease;
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
-    .feature-card:hover::before, .course-card:hover::before, .login-card:hover::before { opacity: 1; }
+    .feature-card:hover::before,
+    .course-card:hover::before,
+    .login-card:hover::before { opacity: 1; }
     .feature-card:hover, .course-card:hover, .login-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.18);
+        border-color: rgba(129, 140, 248, 0.8);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25);
     }
 
-    .course-card { border-radius: 15px; padding: 25px; margin: 15px 0; }
-    .course-code { font-size: 14px; color: #667eea; font-weight: 600; margin-bottom: 8px; }
-    .course-name { font-size: 20px; color: #ffffff; font-weight: 600; margin-bottom: 10px; }
-    .course-info { font-size: 14px; color: #a0a0a0; margin-bottom: 5px; }
+    .course-card {
+        border-radius: 15px;
+        padding: 25px;
+        margin: 15px 0;
+    }
+    .course-code {
+        font-size: 14px;
+        color: #4f46e5;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .course-name {
+        font-size: 20px;
+        color: var(--kk-text-main);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .course-info {
+        font-size: 14px;
+        color: var(--kk-text-soft);
+        margin-bottom: 5px;
+    }
 
-    .stats-container { display: flex; justify-content: space-around; margin: 60px 0; flex-wrap: wrap; }
+    /* STATS */
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        margin: 60px 0;
+        flex-wrap: wrap;
+    }
     .stat-item { text-align: center; padding: 20px; }
     .stat-number {
-        font-size: 48px; font-weight: 700;
+        font-size: 48px;
+        font-weight: 700;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
-    .stat-label { font-size: 16px; color: #a0a0a0; margin-top: 10px; }
+    .stat-label {
+        font-size: 16px;
+        color: var(--kk-text-soft);
+        margin-top: 10px;
+    }
 
-    .section-title { font-size: 48px; font-weight: 700; color: #ffffff; text-align: center; margin: 80px 0 60px; }
+    .section-title {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--kk-text-main);
+        text-align: center;
+        margin: 80px 0 60px;
+    }
 
+    /* BUTTONS */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white; border: none; border-radius: 50px;
-        padding: 12px 40px; font-weight: 600; font-size: 16px; transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 12px 40px !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
     }
-    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
-    .stSelectbox > div > div, .stTextInput > div > div > input, .stPassword > div > div > input {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 10px !important; color: #fff !important;
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
     }
-    label, .stCheckbox, .stSelectbox, .stTextInput, .stPassword { color: #d0d0d0 !important; }
+
+    .stDownloadButton > button {
+        background: var(--kk-card-bg) !important;
+        border-radius: 999px !important;
+        border: 1px solid var(--kk-card-border) !important;
+        color: var(--kk-text-main) !important;
+    }
+    .stDownloadButton > button:hover {
+        border-color: rgba(129, 140, 248, 0.9) !important;
+    }
+
+    /* INPUTS & LABELS */
+    .stSelectbox > div > div,
+    .stTextInput > div > div > input,
+    .stPassword > div > div > input {
+        background: var(--kk-input-bg) !important;
+        border: 1px solid var(--kk-input-border) !important;
+        border-radius: 10px !important;
+        color: var(--kk-text-main) !important;
+    }
+
+    label, .stCheckbox, .stSelectbox, .stTextInput, .stPassword {
+        color: var(--kk-text-muted) !important;
+    }
 
     .login-heading {
-        font-size: 34px; font-weight: 700; color: #fff; margin: 0 0 8px;
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--kk-text-main);
+        margin: 0 0 8px;
         letter-spacing: 0.3px;
     }
     .login-sub {
-        margin: 0 0 18px; color: #a0a0a0; font-size: 14px;
+        margin: 0 0 18px;
+        color: var(--kk-text-soft);
+        font-size: 14px;
     }
     .hint-pill {
-        display: inline-block; padding: 6px 10px; border-radius: 999px;
-        background: rgba(102,126,234,0.12); color: #cfd5ff; font-size: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.25);
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(129, 140, 248, 0.12);
+        color: #4f46e5;
+        font-size: 12px;
+        border: 1px solid rgba(129, 140, 248, 0.45);
+    }
+
+    /* DATAFRAME / TABLE */
+    .stDataFrame, .stDataFrame div {
+        color: var(--kk-text-main) !important;
+    }
+    .stDataFrame table {
+        background-color: var(--kk-table-bg) !important;
+        color: var(--kk-text-main) !important;
+    }
+    .stDataFrame thead tr {
+        background-color: var(--kk-table-header-bg) !important;
+    }
+
+    /* ALERTS (success / error / warning / info) */
+    .stAlert {
+        background-color: var(--kk-alert-bg) !important;
+        color: var(--kk-text-main) !important;
+        border-radius: 12px !important;
+        border: 1px solid var(--kk-alert-border) !important;
+    }
+
+    /* FOOTER TEXT */
+    footer, footer p {
+        color: var(--kk-text-soft) !important;
     }
 </style>
 """,
@@ -362,6 +549,8 @@ else:
     print("Using fallback course data due to API error:", api_result.get("error"))
     courses_data = fallback_courses_data
 
+print(courses_data)
+
 # Stats section
 total_credits = sum(course["credits"] for course in st.session_state.selected_courses)
 
@@ -403,6 +592,141 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+# Payload builder
+def build_payload():
+    return {
+        "semester": st.session_state.semester,
+        "major": st.session_state.major,
+        "minor": st.session_state.minor,
+        "total_courses": len(st.session_state.selected_courses),
+        "total_credits": sum(c["credits"] for c in st.session_state.selected_courses),
+        "courses": [
+            {
+                "code": c["code"],
+                "name": c["name"],
+                "time": c["time"],
+                "professor": c["professor"],
+                "credits": c["credits"],
+                "seats": c["seats"],
+            }
+            for c in st.session_state.selected_courses
+        ],
+    }
+
+
+# Health and submission call
+def call_fastapi_health_and_post(payload: dict, timeout_sec: int = 6):
+    health_result, post_result = None, None
+    try:
+        r = requests.get(HEALTH_URL, timeout=timeout_sec)
+        health_result = {"ok": r.ok, "status_code": r.status_code, "text": r.text}
+    except Exception as e:
+        health_result = {"ok": False, "error": str(e)}
+    try:
+        r2 = requests.post(APPROVAL_URL, json=payload, timeout=timeout_sec)
+        try:
+            post_body = r2.json()
+        except Exception:
+            post_body = r2.text
+        post_result = {"ok": r2.ok, "status_code": r2.status_code, "body": post_body}
+    except Exception as e:
+        post_result = {"ok": False, "error": str(e)}
+    return health_result, post_result
+
+
+# Schedule section
+if st.session_state.selected_courses:
+    st.markdown('<div class="section-title">My Course Schedule</div>', unsafe_allow_html=True)
+    cc1, cc2 = st.columns([2.5, 1])
+    with cc1:
+        schedule_data = [
+            {
+                "Course Code": c["code"],
+                "Course Name": c["name"],
+                "Time": c["time"],
+                "Professor": c["professor"],
+                "Credits": c["credits"],
+            }
+            for c in st.session_state.selected_courses
+        ]
+        df = pd.DataFrame(schedule_data)
+        st.dataframe(df, width="stretch", hide_index=True, height=400)
+
+        total_credits = sum(x["credits"] for x in st.session_state.selected_courses)
+
+        with cc2:
+            st.markdown(
+                f"""
+                <div class="feature-card"
+                    style="
+                        height: 400px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                    ">
+                    <div>
+                        <div class="feature-title"
+                            style="color:var(--kk-text-main);font-weight:700;font-size:24px;margin-bottom:20px;">
+                            Summary
+                        </div>
+                        <div class="feature-description"
+                            style="color:var(--kk-text-muted);line-height:1.8;">
+                            <strong style="color:var(--kk-text-main);">Major:</strong>
+                            {st.session_state.major}<br>
+
+                            <strong style="color:var(--kk-text-main);">Minor:</strong>
+                            {st.session_state.minor}<br>
+
+                            <strong style="color:var(--kk-text-main);">Total Courses:</strong>
+                            {len(st.session_state.selected_courses)}<br>
+
+                            <strong style="color:var(--kk-text-main);">Total Credits:</strong>
+                            {total_credits}<br>
+
+                            <strong style="color:var(--kk-text-main);">Semester:</strong>
+                            {st.session_state.semester}
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
+
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("Export", key="export", use_container_width=True):
+                export_df = pd.DataFrame(schedule_data)
+                csv_data = export_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    "Download CSV",
+                    csv_data,
+                    file_name=f"KursKraft_{st.session_state.semester.replace(' ', '_').lower()}.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+                st.success("✅ Schedule exported!")
+        with b2:
+            if st.button("Clear", key="clear", use_container_width=True):
+                st.session_state.selected_courses = []
+                st.rerun()
+
+        st.markdown('<div style="margin-top: 16px;"></div>', unsafe_allow_html=True)
+
+        if st.button("Request for Approval", key="approval", use_container_width=True, type="primary"):
+            if len(st.session_state.selected_courses) > 0:
+                st.session_state.approval_requested = True
+                with st.spinner("Contacting advisor service and sending your selection..."):
+                    payload = build_payload()
+                    health_res, post_res = call_fastapi_health_and_post(payload)
+                st.success("✅ Approval request submitted!")
+                st.balloons()
+                st.info(
+                    f"📧 Your course schedule for {st.session_state.semester} has been sent to your academic advisor for"
+                    "review."
+                )
 # Course browser controls
 st.markdown('<div class="section-title">Browse Available Courses</div>', unsafe_allow_html=True)
 
@@ -459,131 +783,6 @@ for dept in departments_to_show:
                 if st.button("✓ Added", key=remove_key, type="secondary"):
                     st.session_state.selected_courses.remove(course)
                     st.rerun()
-
-
-# Payload builder
-def build_payload():
-    return {
-        "semester": st.session_state.semester,
-        "major": st.session_state.major,
-        "minor": st.session_state.minor,
-        "total_courses": len(st.session_state.selected_courses),
-        "total_credits": sum(c["credits"] for c in st.session_state.selected_courses),
-        "courses": [
-            {
-                "code": c["code"],
-                "name": c["name"],
-                "time": c["time"],
-                "professor": c["professor"],
-                "credits": c["credits"],
-                "seats": c["seats"],
-            }
-            for c in st.session_state.selected_courses
-        ],
-    }
-
-
-# Health and submission call
-def call_fastapi_health_and_post(payload: dict, timeout_sec: int = 6):
-    health_result, post_result = None, None
-    try:
-        r = requests.get(HEALTH_URL, timeout=timeout_sec)
-        health_result = {"ok": r.ok, "status_code": r.status_code, "text": r.text}
-    except Exception as e:
-        health_result = {"ok": False, "error": str(e)}
-    try:
-        r2 = requests.post(APPROVAL_URL, json=payload, timeout=timeout_sec)
-        try:
-            post_body = r2.json()
-        except Exception:
-            post_body = r2.text
-        post_result = {"ok": r2.ok, "status_code": r2.status_code, "body": post_body}
-    except Exception as e:
-        post_result = {"ok": False, "error": str(e)}
-    return health_result, post_result
-
-
-# Schedule section
-if st.session_state.selected_courses:
-    st.markdown('<div class="section-title">My Course Schedule</div>', unsafe_allow_html=True)
-    cc1, cc2 = st.columns([3, 1])
-    with cc1:
-        schedule_data = [
-            {
-                "Course Code": c["code"],
-                "Course Name": c["name"],
-                "Time": c["time"],
-                "Professor": c["professor"],
-                "Credits": c["credits"],
-            }
-            for c in st.session_state.selected_courses
-        ]
-        df = pd.DataFrame(schedule_data)
-        st.dataframe(df, width="stretch", hide_index=True)
-
-    with cc2:
-        st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
-        st.markdown(
-            f"""
-            <div class="feature-card">
-                <div class="feature-title" style="color:#fff;font-weight:700;">Summary</div>
-                <div class="feature-description">
-                    <strong>Major:</strong> {st.session_state.major}<br>
-                    <strong>Minor:</strong> {st.session_state.minor}<br>
-                    <strong>Total Courses:</strong> {len(st.session_state.selected_courses)}<br>
-                    <strong>Total Credits:</strong> {sum(x['credits'] for x in st.session_state.selected_courses)}<br>
-                    <strong>Semester:</strong> {st.session_state.semester}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        b1, b2 = st.columns(2)
-        with b1:
-            if st.button("📥 Export", key="export", width="stretch"):
-                export_df = pd.DataFrame(schedule_data)
-                csv_data = export_df.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "Download CSV",
-                    csv_data,
-                    file_name=f"KursKraft_{st.session_state.semester.replace(' ', '_').lower()}.csv",
-                    mime="text/csv",
-                    width="stretch",
-                )
-                st.success("✅ Schedule exported!")
-        with b2:
-            if st.button("🗑️ Clear", key="clear", width="stretch"):
-                st.session_state.selected_courses = []
-                st.rerun()
-        st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
-
-        if st.button("📋 Request for Approval", key="approval", width="stretch", type="primary"):
-            if len(st.session_state.selected_courses) > 0:
-                st.session_state.approval_requested = True
-                with st.spinner("Contacting advisor service and sending your selection..."):
-                    payload = build_payload()
-                    health_res, post_res = call_fastapi_health_and_post(payload)
-                st.success("✅ Approval request submitted!")
-                st.balloons()
-                st.info(
-                    f"📧 Your course schedule for {st.session_state.semester} has been sent to your academic advisor for"
-                    "review."
-                )
-
-                # st.markdown("#### Service Health")
-                # if health_res.get("ok"):
-                #     st.success(f"Health OK (status {health_res.get('status_code')}) — {health_res.get('text')}")
-                # else:
-                #     st.error(f"Health check failed: {health_res}")
-
-                # st.markdown("#### Submission Response")
-                # if post_res.get("ok"):
-                #     st.success(f"Submission accepted (status {post_res.get('status_code')}).")
-                #     st.json(post_res.get("body"))
-                # else:
-                #     st.error(f"Submission failed: {post_res}")
-            else:
-                st.warning("⚠️ Please add courses before requesting approval.")
 
 # Tips and footer
 st.markdown('<div class="section-title">Planning Tips</div>', unsafe_allow_html=True)

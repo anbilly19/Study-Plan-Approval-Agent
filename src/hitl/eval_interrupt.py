@@ -5,9 +5,16 @@ def run_hitl_evaluation(main_agent, study_plan: str) -> dict:
     """Run the main agent with human-in-the-loop for YELLOW evaluations."""
     thread_id = "interrupt-123"
     result = main_agent.invoke({"study_plan": study_plan}, config={"configurable": {"thread_id": thread_id}})
+
+    print("result", result)
+
     if "__interrupt__" in result:
         # Present review information to human, collect decision:
         action = result["__interrupt__"]
+        print("action", action)
+
+        print("Human review required:")
+
         print(action[0].value["action_requests"][0]["description"])  # Display the interrupt message
         # Simulate getting human review:
         decision = input("Enter decision (approve/edit/reject): ")

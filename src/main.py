@@ -67,7 +67,9 @@ hitl = True
 
 if __name__ == "__main__":
     # Example usage with a test study plan
+    print("Running Study Plan Evaluation...")
     if hitl:
+        print("Running with Human-in-the-Loop Interrupt...")
         main_agent = create_interrupt_main_agent(
             eval_agents,
             model_name=llama_70b,

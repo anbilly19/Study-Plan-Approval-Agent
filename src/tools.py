@@ -51,6 +51,7 @@ def weighted_score_tool_with_interrupt(scheduling_score: int, alignment_score: i
         return "green"
 
 
+# ToDo: Replace with DB queries
 class DatabaseTool:
     """Base class for database tools."""
 
