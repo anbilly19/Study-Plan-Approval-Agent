@@ -27,8 +27,7 @@ class StatusUpdate(BaseModel):
 
 @app.get("/health")
 def health_check():
-    print("Health check endpoint called")
-    return {"decision": "yellow"}
+    return {"status": "ok"}
 
 
 @app.post("/approval")

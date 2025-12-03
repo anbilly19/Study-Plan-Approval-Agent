@@ -1,7 +1,5 @@
 # admin_dashboard_production.py
-import ast
 import os
-import time
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -629,30 +627,11 @@ def inject_production_css() -> None:
     .stForm {
         width: 100%;
     }
-
-    /* AI evaluation actions: put buttons side-by-side with natural width */
-    .ai-actions .stButton > button {
-        width: auto !important;
-        min-width: 170px;
-        padding-left: 24px !important;
-        padding-right: 24px !important;
-    }
-
-    .ai-actions [data-testid="column"] {
-        display: flex;
-        justify-content: flex-start;
-    }
 </style>
 """,
         unsafe_allow_html=True,
     )
 
-
-# AI evaluation state (inline, per-case)
-if "ai_modal_case_id" not in st.session_state:
-    st.session_state.ai_modal_case_id = None
-if "ai_modal_result" not in st.session_state:
-    st.session_state.ai_modal_result = None
 
 # Session state defaults
 ADMIN_CREDENTIALS = {"1": "1"}
@@ -699,13 +678,17 @@ def update_case_status(case_id: str, status: str, timeout: int = 6) -> dict:
         return {"ok": False, "error": str(e)}
 
 
-def evaluate_with_ai(case_id: str, timeout: int = 6) -> dict:
-    """Call the /health endpoint as a placeholder for the advisor service."""
+def evaluate_with_ai(timeout: int = 6) -> dict:
+    """Call the /health endpoint and return its response."""
     try:
-        time.sleep(5)  # Simulate processing delay
         response = requests.get(HEALTH_URL, timeout=timeout)
-        body = response.json() if "application/json" in response.headers.get("content-type", "") else response.text
-        return {"ok": response.ok, "status_code": response.status_code, "body": body}
+        content_type = response.headers.get("content-type", "")
+        body = response.json() if "application/json" in content_type else response.text
+        return {
+            "ok": response.ok,
+            "status_code": response.status_code,
+            "body": body,
+        }
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
@@ -858,8 +841,6 @@ with st.sidebar:
         st.session_state.admin_auth = False
         st.session_state.admin_user = None
         st.session_state.expanded_case = None
-        st.session_state.ai_modal_case_id = None
-        st.session_state.ai_modal_result = None
         st.rerun()
 
 st.markdown(
@@ -1067,95 +1048,27 @@ else:
                             else result.get("error", "Unknown error")
                         )
 
-                    st.error(f"❌ Failed: {error_text}")
+                        st.error(f"❌ Failed: {error_text}")
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            # AI Evaluate
+            # AI Evaluate -> call /health and show output
             with col3:
                 st.markdown('<div class="btn-secondary">', unsafe_allow_html=True)
+                ai_result = None
                 if st.button("🤖 AI Evaluate", key=f"ai_{case_key}", use_container_width=True):
-                    with st.spinner("Evaluating..."):
-                        result = evaluate_with_ai(case["case_id"])
+                    with st.spinner("Calling health endpoint..."):
+                        ai_result = evaluate_with_ai()
 
-                    st.session_state.ai_modal_case_id = case["case_id"]
-                    st.session_state.ai_modal_result = result
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            # Inline AI evaluation result (only for this case)
-            if st.session_state.ai_modal_case_id == case_key and st.session_state.ai_modal_result is not None:
-                st.markdown("### 🤖 AI Evaluation Result")
-
-                result = st.session_state.ai_modal_result
-                if result.get("ok"):
-                    body = result.get("body")
-                    if isinstance(body, (dict, list)):
-                        st.json(body)
+                if ai_result is not None:
+                    st.markdown("**Health API Response:**")
+                    if ai_result.get("ok"):
+                        body = ai_result.get("body")
+                        if isinstance(body, (dict, list)):
+                            st.json(body)
+                        else:
+                            st.write(body)
                     else:
-                        st.write(body)
-                else:
-                    st.error(result.get("error") or result.get("body") or "Unknown error")
-
-                st.markdown("---")
-                st.markdown("### ✏️ Enter Evaluation Scores")
-
-                default_scores = "{'alignment_score': 0, 'scheduling_score': 0, 'workload_score': 0}"
-
-                scores_input = st.text_area(
-                    "AI Evaluation Details:",
-                    value=default_scores,
-                    key=f"ai_scores_{case_key}",
-                    height=120,
-                    help="Enter evaluation scores in Python dict or JSON format.",
-                )
-
-                # Button row with special CSS wrapper so they sit side by side
-                st.markdown('<div class="ai-actions">', unsafe_allow_html=True)
-                colA, colB = st.columns([1, 1])
-
-                # Submit Evaluation
-                with colA:
-                    if st.button("💾 Submit Evaluation", key=f"save_eval_{case_key}"):
-                        try:
-                            # Safely parse the text into a Python dict
-                            scores_dict = ast.literal_eval(scores_input)
-
-                            alignment = scores_dict.get("alignment_score")
-                            scheduling = scores_dict.get("scheduling_score")
-                            workload = scores_dict.get("workload_score")
-
-                            if not all(isinstance(x, (int, float)) for x in [alignment, scheduling, workload]):
-                                st.error(
-                                    "Please provide numeric values for "
-                                    "'alignment_score', 'scheduling_score', and 'workload_score'."
-                                )
-                            else:
-                                # Decision logic
-                                if alignment > 70 and scheduling > 70 and workload > 70:
-                                    decision_payload = {"decision": "Green"}
-                                else:
-                                    decision_payload = {"decision": "Red"}
-
-                                # Update the AI result box with the decision
-                                time.sleep(5)
-                                st.session_state.ai_modal_result = {
-                                    "ok": True,
-                                    "body": decision_payload,
-                                }
-
-                                st.success("AI Evaluation updated.")
-                                st.rerun()
-
-                        except Exception as e:
-                            st.error(f"Could not parse evaluation scores: {e}")
-
-                # Clear AI result
-                with colB:
-                    if st.button("Clear AI Result", key=f"clear_ai_{case_key}"):
-                        st.session_state.ai_modal_case_id = None
-                        st.session_state.ai_modal_result = None
-                        st.rerun()
-
+                        st.error(ai_result.get("error") or ai_result.get("body") or "Unknown error")
                 st.markdown("</div>", unsafe_allow_html=True)
 
 footer_html = """
