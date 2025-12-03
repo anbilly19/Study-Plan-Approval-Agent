@@ -1,6 +1,7 @@
 """Module defining various tools for evaluation and database querying."""
+
 from functools import partial
-from typing import Optional, Dict, Any
+from typing import Any, Dict
 
 import pandas as pd
 from langchain_core.tools import StructuredTool, tool
@@ -17,6 +18,7 @@ def weighted_score_tool(
 ) -> Dict[str, Any]:
     """
     Calculate weighted average and return structured result.
+
     Weights: 0.25 sched, 0.25 align, 0.5 workload (pure, no HITL).
     """
     w_avg = 0.25 * scheduling_score + 0.25 * alignment_score + 0.5 * workload_score
@@ -33,18 +35,20 @@ def weighted_score_tool(
             "scheduling_score": scheduling_score,
             "alignment_score": alignment_score,
             "workload_score": workload_score,
-        }
+        },
     }
 
+
 @tool
-def ask_human_tool() -> Dict[str, Any]:
+def ask_human_tool() -> None:
     """Tool to ask human for review in HITL scenarios."""
     pass
     return None
 
+
 @tool
 def workload_score_tool(num_courses: int) -> int:
-    """Simple workload scoring based on number of courses."""
+    """Compute a simple workload score based on the number of courses."""
     if num_courses <= 6:
         return 80  # light workload
     elif 7 <= num_courses <= 10:
@@ -53,6 +57,7 @@ def workload_score_tool(num_courses: int) -> int:
         return 30  # heavy workload
 
 
+# ToDo: Replace with DB queries
 class DatabaseTool:
     """Base class for database tools."""
 

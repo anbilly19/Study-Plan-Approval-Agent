@@ -2,26 +2,23 @@
 """Main entry point for running the study plan evaluation with optional HITL."""
 import os
 import warnings
+from pprint import pprint
 from typing import Any, Optional
 
 from dotenv import load_dotenv
 from pydantic.json_schema import PydanticJsonSchemaWarning
-from pprint import pprint
 
 from agents.main_agent import create_interrupt_main_agent, create_main_agent
 from agents.study_eval_agent import EvalAgents
-from hitl.eval_interrupt import run_hitl_evaluation
 from env_setup import setup_langsmith_env
+from hitl.eval_interrupt import run_hitl_evaluation
 from prompts.prompt import (
-    alignment_prompt_text,
     alignment_prompt,
     green_case,
-    synth_prompt,
-    red_case,
     interrupt_agent_prompt,
     main_agent_prompt,
-    scheduling_prompt_text,
     scheduling_prompt,
+    synth_prompt,
     synth_prompt_interrupt,
     yellow_case,
 )
@@ -79,6 +76,7 @@ def evaluate_study_plan(
 ) -> Any:
     """
     Unified entry the API can call.
+
     - If hitl=False: create_main_agent -> invoke(study_plan)
     - If hitl=True:  create_interrupt_main_agent -> run_hitl_evaluation(...)
       NOTE: HITL path is interactive; API should not call this directly unless you
@@ -92,17 +90,14 @@ def evaluate_study_plan(
             eval_agents,
             model_name=model_name,
             interrupt_agent_prompt=interrupt_agent_prompt,
-            synth_prompt=synth_prompt_interrupt
+            synth_prompt=synth_prompt_interrupt,
         )
         plan_text = yellow_case if use_examples else study_plan
         return run_hitl_evaluation(chain, plan_text, synth)
 
     # non-HITL
     chain = create_main_agent(
-        eval_agents,
-        model_name=model_name,
-        main_agent_prompt=main_agent_prompt,
-        synth_prompt=synth_prompt
+        eval_agents, model_name=model_name, main_agent_prompt=main_agent_prompt, synth_prompt=synth_prompt
     )
     plan_text = green_case if use_examples else study_plan
     return run_evaluation(chain, plan_text)
