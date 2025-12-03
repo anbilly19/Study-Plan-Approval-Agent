@@ -1,0 +1,2608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title
+        data-en="Hardware for AI - Football Pitch Edition"
+        data-de="Hardware für KI – Fußballplatz-Edition"
+        data-es="Hardware para IA - Edición campo de fútbol"
+        data-pt="Hardware para IA - Edição campo de futebol"
+    >
+        Hardware for AI - Football Pitch Edition
+    </title>
+    <style>
+        :root {
+            /* Football pitch palette */
+            --pitch-dark: #0a5f0a;
+            --pitch-light: #0d7a0d;
+            --line-color: rgba(255, 255, 255, 0.7);
+
+            /* Card + text colors */
+            --card-bg: #ffffff;
+            --card-border: #d0d7e2;
+            --card-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+            --ink-0: #111827;
+            --ink-1: #4b5563;
+
+            /* Accents */
+            --accent-gold: #d4a013;
+            --accent-red: #d94444;
+            --accent-blue: #2b6cb0;
+            --accent-green: #17813d;
+
+            --muted-bg: #f5f7fb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== PITCH BACKGROUND ========== */
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    var(--pitch-dark) 0px,
+                    var(--pitch-dark) 55px,
+                    var(--pitch-light) 55px,
+                    var(--pitch-light) 110px
+                );
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--ink-0);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Stadium lights glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 160px;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.75;
+        }
+
+        /* Center circle */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 2px solid rgba(255, 255, 255, 0.65);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating football emojis background layer */
+        #footballSky {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        /* Updated Floating Logic: Horizontal Movement */
+        .football-float {
+            position: absolute;
+            font-size: 32px;
+            opacity: 0.6;
+            left: -10vw;
+            animation: sidePass var(--duration, 15s) linear infinite;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            z-index: 0;
+        }
+
+        @keyframes sidePass {
+            0% {
+                transform: translateX(0) rotate(0deg);
+            }
+            100% {
+                transform: translateX(120vw) rotate(360deg);
+            }
+        }
+
+        /* Main content container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== SCOREBOARD HEADER ========== */
+        .scoreboard {
+            background: #ffffffdd;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px 18px 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scoreboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                #e53e3e 0%, #e53e3e 33%,
+                #ecc94b 33%, #ecc94b 66%,
+                #38a169 66%, #38a169 100%);
+            opacity: 0.9;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: #1f2933;
+            letter-spacing: 0.08em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+        }
+
+        /* ========== CAST / LINEUP CARDS ========== */
+        .cast-glance {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 20px 0 20px;
+        }
+
+        .cast-card {
+            background: #ffffffee;
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .cast-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 12px;
+            right: 12px;
+            height: 3px;
+            border-radius: 999px;
+            background: var(--cast-color, #9ca3af);
+            opacity: 0.9;
+        }
+
+        .cast-card.cpu { --cast-color: #e53e3e; }
+        .cast-card.gpu { --cast-color: #3182ce; }
+        .cast-card.tpu { --cast-color: #d69e2e; }
+        .cast-card.fpga { --cast-color: #2f855a; }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            background: radial-gradient(circle at 30% 20%, #ffffff 0%, #f1f5f9 55%, #e2e8f0 100%);
+            border: 1px solid #cbd5e1;
+        }
+
+        .cast-name {
+            font-weight: 700;
+            color: var(--ink-0);
+            margin-bottom: 2px;
+        }
+
+        .cast-role {
+            font-size: .8rem;
+            color: var(--ink-1);
+        }
+
+        .chip-role {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: .7rem;
+            border: 1px solid rgba(99, 102, 241, .35);
+            background: rgba(129, 140, 248, .08);
+            color: #4338ca;
+            margin-top: 4px;
+        }
+
+        /* ========== TOP PROGRESS BAR ========== */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 999px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            border: 1px solid #d1d5db;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #63b3ed 0%, #ecc94b 50%, #48bb78 100%);
+            border-radius: inherit;
+            transition: width .4s ease;
+            box-shadow: 0 0 6px rgba(59, 130, 246, 0.7);
+            width: 0%;
+        }
+
+        /* ========== STEP CARDS ========== */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .step {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px 16px 16px;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: box-shadow .2s ease, transform .15s ease, border-color .2s ease, background-color .15s ease;
+            opacity: 0;
+            transform: translateY(8px);
+            animation: stepIn .35s ease forwards;
+            border: 1px solid var(--card-border);
+            outline: none;
+        }
+
+        .step:nth-child(1) { animation-delay: 0.05s; }
+        .step:nth-child(2) { animation-delay: 0.1s; }
+        .step:nth-child(3) { animation-delay: 0.15s; }
+        .step:nth-child(4) { animation-delay: 0.2s; }
+        .step:nth-child(5) { animation-delay: 0.25s; }
+        .step:nth-child(6) { animation-delay: 0.3s; }
+        .step:nth-child(7) { animation-delay: 0.35s; }
+        .step:nth-child(8) { animation-delay: 0.4s; }
+
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.24);
+            border-color: #cbd5e1;
+        }
+
+        .step.active {
+            background: #f9fafb;
+            border-color: #93c5fd;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .step-number {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 20%, #ffffff 0%, #e0ecff 55%, #c4ddff 100%);
+            color: var(--ink-0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            border: 1px solid #bfdbfe;
+            position: relative;
+        }
+
+        .step-number::after {
+            content: "";
+            position: absolute;
+            right: -6px;
+            bottom: -6px;
+            width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            font-size: 0.75rem;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+        }
+
+        .step:nth-of-type(1) .step-number::after { content: "📚"; }
+        .step:nth-of-type(2) .step-number::after { content: "🏛️"; }
+        .step:nth-of-type(3) .step-number::after { content: "🧠"; }
+        .step:nth-of-type(4) .step-number::after { content: "🎮"; }
+        .step:nth-of-type(5) .step-number::after { content: "⚡"; }
+        .step:nth-of-type(6) .step-number::after { content: "☁️"; }
+        .step:nth-of-type(7) .step-number::after { content: "🎓"; }
+        .step:nth-of-type(8) .step-number::after { content: "♻️"; }
+
+        .step-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--ink-0);
+        }
+
+        .step-content {
+            display: none;
+            padding-left: 56px;
+            margin-top: 8px;
+        }
+
+        .step.active .step-content {
+            display: block;
+        }
+
+        .step-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--ink-1);
+            margin-bottom: 10px;
+        }
+
+        .visual-icon {
+            font-size: 2.1rem;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        /* Info box */
+        .info-box {
+            background: var(--muted-bg);
+            border-radius: 10px;
+            border-left: 4px solid #60a5fa;
+            padding: 10px 12px;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .step.active .info-box {
+            border-left-color: #3b82f6;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            margin: 2px 0;
+        }
+
+        .info-box li::before {
+            content: "• ";
+            color: #16a34a;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        /* Comparison cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin: 10px 0;
+        }
+
+        .comparison-card {
+            background: #ffffff;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: var(--card-shadow);
+            font-size: 0.9rem;
+        }
+
+        .comparison-card h4 {
+            color: #1d4ed8;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-card li {
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-card li:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-card li::before {
+            content: "• ";
+            color: #16a34a;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        /* ========== SIMULATION BLOCKS ========== */
+        .simulation-container {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .simulation-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .processor-demo {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        .processor-demo h4 {
+            color: #111827;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .demo-canvas {
+            background: #f3f4f6;
+            border-radius: 8px;
+            margin: 8px 0;
+            min-height: 70px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .cpu-customer,
+        .gpu-customer {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.05rem;
+            background: #e5e7eb;
+            transition: all 0.25s ease;
+        }
+
+        .cpu-customer.processing,
+        .gpu-customer.processing {
+            background: #fbbf24;
+            transform: translateY(-1px);
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+        }
+
+        .cpu-customer.done,
+        .gpu-customer.done {
+            background: #bbf7d0;
+        }
+
+        /* TPU grid */
+        .tpu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            width: 130px;
+            margin: 0 auto 8px;
+        }
+
+        .tpu-dancer {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.05rem;
+            background: #e5e7eb;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .tpu-dancer.active {
+            background: #c7d2fe;
+            transform: scale(1.05);
+        }
+
+        /* Generic control buttons for simulations */
+        .control-btn {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.15s ease;
+            margin: 5px 4px;
+        }
+
+        .control-btn:hover {
+            background: #1d4ed8;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .control-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* ========== RACE SIMULATION ========== */
+        .race-row {
+            display: grid;
+            grid-template-columns: 150px 1fr 70px;
+            gap: 6px;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 0.85rem;
+        }
+
+        .race-label {
+            text-align: right;
+            padding-right: 4px;
+            color: var(--ink-1);
+        }
+
+        .race-track {
+            position: relative;
+            height: 14px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            overflow: hidden;
+            border: 1px solid #d4d4d8;
+        }
+
+        .race-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.15s linear;
+        }
+
+        .cpu-bar {
+            background: linear-gradient(90deg, #9ca3af, #d1d5db);
+        }
+
+        .gpu-bar {
+            background: linear-gradient(90deg, #60a5fa, #22c55e);
+        }
+
+        .tpu-bar {
+            background: linear-gradient(90deg, #a855f7, #facc15);
+        }
+
+        .race-status {
+            font-size: 0.8rem;
+            color: var(--ink-1);
+        }
+
+        /* Quiz / notes */
+        .quiz-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fffbeb;
+            border-radius: 10px;
+            border: 1px solid #fbbf24;
+            font-size: 0.9rem;
+        }
+
+        .quiz-title {
+            font-weight: 600;
+            color: #b45309;
+        }
+
+        select#hwSelect {
+            width: 100%;
+            padding: 9px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            background: #ffffff;
+            color: var(--ink-0);
+        }
+
+        /* Footer quote */
+        .footer-note {
+            text-align: center;
+            font-style: italic;
+            margin-top: 30px;
+            font-size: .9rem;
+            color: #fef9c3;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Animations + responsive */
+        @keyframes stepIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.7rem; }
+            .scoreboard { padding: 16px 12px; }
+            .step-content { padding-left: 0; }
+            .step-header { flex-direction: column; align-items: flex-start; }
+            .race-row {
+                grid-template-columns: 1fr;
+                gap: 3px;
+            }
+            .race-label { text-align: left; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating football emojis layer -->
+    <div id="footballSky" aria-hidden="true"></div>
+
+    <div class="container">
+        <!-- Scoreboard Header -->
+        <div class="scoreboard">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div style="flex:1 1 auto; min-width:240px; text-align:center;">
+                    <h1
+                        data-en="⚽ Hardware for AI"
+                        data-de="⚽ Hardware für KI"
+                        data-es="⚽ Hardware para IA"
+                        data-pt="⚽ Hardware para IA">
+                        ⚽ Hardware for AI
+                    </h1>
+                    <p class="subtitle"
+                       data-en="A football-themed tour of CPUs, GPUs, TPUs &amp; more"
+                       data-de="Eine Fußball-Tour durch CPUs, GPUs, TPUs &amp; mehr"
+                       data-es="Un recorrido futbolero por CPUs, GPUs, TPUs y más"
+                       data-pt="Um tour de futebol por CPUs, GPUs, TPUs e mais">
+                        A football-themed tour of CPUs, GPUs, TPUs &amp; more
+                    </p>
+                </div>
+
+                <!-- Language selector -->
+                <div style="flex:0 0 auto;">
+                    <select id="languageSelect"
+                            style="padding: 8px 12px; border-radius: 8px; border: 1px solid #d1d5db; background: white; font-size:0.9rem; font-weight:600; cursor:pointer;">
+                        <option value="en">🇬🇧 English</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="pt">🇵🇹 Português</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hardware cast as top lineup -->
+        <section class="cast-glance" aria-label="Hardware Cast">
+            <article class="cast-card cpu">
+                <div class="avatar">🧠</div>
+                <div>
+                    <div class="cast-name">CPU</div>
+                    <div class="cast-role">
+                        <span
+                            data-en="Central Processing Unit · "
+                            data-de="Zentrale Verarbeitungseinheit · "
+                            data-es="Unidad Central de Procesamiento · "
+                            data-pt="Unidade Central de Processamento · ">
+                            Central Processing Unit ·
+                        </span>
+                        <span class="chip-role"
+                              data-en="Playmaker in the middle"
+                              data-de="Spielmacher im Mittelfeld"
+                              data-es="Creador de juego en el mediocampo"
+                              data-pt="Maestro no meio-campo">
+                            Playmaker in the middle
+                        </span>
+                    </div>
+                </div>
+            </article>
+            <article class="cast-card gpu">
+                <div class="avatar">🎮</div>
+                <div>
+                    <div class="cast-name">GPU</div>
+                    <div class="cast-role">
+                        <span
+                            data-en="Graphics Processing Unit · "
+                            data-de="Grafikprozessor · "
+                            data-es="Unidad de Procesamiento Gráfico · "
+                            data-pt="Unidade de Processamento Gráfico · ">
+                            Graphics Processing Unit ·
+                        </span>
+                        <span class="chip-role"
+                              data-en="Whole-team attack"
+                              data-de="Angriff mit der ganzen Mannschaft"
+                              data-es="Ataque con todo el equipo"
+                              data-pt="Ataque com o time inteiro">
+                            Whole-team attack
+                        </span>
+                    </div>
+                </div>
+            </article>
+            <article class="cast-card tpu">
+                <div class="avatar">⚡</div>
+                <div>
+                    <div class="cast-name">TPU</div>
+                    <div class="cast-role">
+                        <span
+                            data-en="Tensor Processing Unit · "
+                            data-de="Tensor-Prozessor · "
+                            data-es="Unidad de Procesamiento Tensorial · "
+                            data-pt="Unidade de Processamento Tensorial · ">
+                            Tensor Processing Unit ·
+                        </span>
+                        <span class="chip-role"
+                              data-en="Tiki-taka engine"
+                              data-de="Tiki-Taka-Motor"
+                              data-es="Motor del tiki-taka"
+                              data-pt="Motor do tiki-taka">
+                            Tiki-taka engine
+                        </span>
+                    </div>
+                </div>
+            </article>
+            <article class="cast-card fpga">
+                <div class="avatar">🔧</div>
+                <div>
+                    <div class="cast-name">FPGA</div>
+                    <div class="cast-role">
+                        <span
+                            data-en="Reconfigurable Hardware · "
+                            data-de="Rekonfigurierbare Hardware · "
+                            data-es="Hardware reconfigurable · "
+                            data-pt="Hardware reconfigurável · ">
+                            Reconfigurable Hardware ·
+                        </span>
+                        <span class="chip-role"
+                              data-en="Tactical shapeshifter"
+                              data-de="Taktischer Formwandler"
+                              data-es="Camaleón táctico"
+                              data-pt="Camaleão tático">
+                            Tactical shapeshifter
+                        </span>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- Match progress bar -->
+        <div class="progress-bar" aria-label="Progress">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- STEPS -->
+        <div class="steps-container" id="steps">
+            <!-- STEP 1 -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title"
+                         data-en="Key Terms &amp; Performance Concepts"
+                         data-de="Grundbegriffe &amp; Performance-Konzepte"
+                         data-es="Conceptos clave y rendimiento"
+                         data-pt="Conceitos básicos e desempenho">
+                        Key Terms &amp; Performance Concepts
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">📚 ➔ 🧠</div>
+                    <p class="step-description"
+                       data-en="Before comparing CPUs, GPUs, and TPUs, we need a shared vocabulary. These ideas show up in every “why is my model so slow?” conversation."
+                       data-de="Bevor wir CPUs, GPUs und TPUs vergleichen, brauchen wir eine gemeinsame Sprache. Diese Ideen tauchen in jedem „Warum ist mein Modell so langsam?“-Gespräch auf."
+                       data-es="Antes de comparar CPUs, GPUs y TPUs, necesitamos un vocabulario común. Estas ideas aparecen en cada conversación de “¿por qué mi modelo es tan lento?”."
+                       data-pt="Antes de comparar CPUs, GPUs e TPUs, precisamos de um vocabulário comum. Essas ideias aparecem em toda conversa de “por que meu modelo está tão lento?”.">
+                        Before comparing CPUs, GPUs, and TPUs, we need a shared vocabulary. These ideas show up in every
+                        “why is my model so slow?” conversation.
+                    </p>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="⏱️ Latency"
+                             data-de="⏱️ Latenz"
+                             data-es="⏱️ Latencia"
+                             data-pt="⏱️ Latência">
+                            ⏱️ Latency
+                        </div>
+                        <p
+                            data-en="Time from input to output. Like how long it takes for one pass to turn into a shot on goal."
+                            data-de="Zeit vom Eingang bis zur Ausgabe. So wie die Zeit, die ein Pass braucht, bis er zu einem Torschuss wird."
+                            data-es="Tiempo desde la entrada hasta la salida. Como el tiempo que tarda un pase en convertirse en un tiro a puerta."
+                            data-pt="Tempo entre a entrada e a saída. Como o tempo que um passe leva para virar um chute ao gol.">
+                            Time from input to output. Like how long it takes for one pass to turn into a shot on goal.
+                        </p>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="📊 Throughput"
+                             data-de="📊 Durchsatz"
+                             data-es="📊 Rendimiento"
+                             data-pt="📊 Vazão">
+                            📊 Throughput
+                        </div>
+                        <p
+                            data-en="How much work we do per second. Think of how many attacks your team can build per minute — how many chances can you create?"
+                            data-de="Wie viel Arbeit wir pro Sekunde erledigen. Stell dir vor, wie viele Angriffe dein Team pro Minute aufbauen kann – wie viele Chancen könnt ihr kreieren?"
+                            data-es="Cuánto trabajo hacemos por segundo. Piensa en cuántos ataques puede construir tu equipo por minuto: ¿cuántas ocasiones podéis crear?"
+                            data-pt="Quanto trabalho fazemos por segundo. Pense em quantos ataques seu time consegue construir por minuto — quantas chances vocês criam?">
+                            How much work we do per second. Think of how many attacks your team can build per minute — how many chances can you create?
+                        </p>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="📡 Bandwidth"
+                             data-de="📡 Bandbreite"
+                             data-es="📡 Ancho de banda"
+                             data-pt="📡 Largura de banda">
+                            📡 Bandwidth
+                        </div>
+                        <p
+                            data-en="How fast we can move data between memory and the processor. If bandwidth is low, it’s like trying to counter-attack through a crowded midfield."
+                            data-de="Wie schnell wir Daten zwischen Speicher und Prozessor bewegen können. Ist die Bandbreite gering, ist es wie ein Konter durch ein überfülltes Mittelfeld."
+                            data-es="Qué tan rápido podemos mover datos entre la memoria y el procesador. Si el ancho de banda es bajo, es como intentar contraatacar por un mediocampo abarrotado."
+                            data-pt="Quão rápido conseguimos mover dados entre memória e processador. Se a largura de banda é baixa, é como tentar contra-atacar por um meio-campo lotado.">
+                            How fast we can move data between memory and the processor. If bandwidth is low, it’s like trying to counter-attack through a crowded midfield.
+                        </p>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="⚡ Power &amp; Energy"
+                             data-de="⚡ Leistung &amp; Energie"
+                             data-es="⚡ Potencia y energía"
+                             data-pt="⚡ Potência &amp; energia">
+                            ⚡ Power &amp; Energy
+                        </div>
+                        <p
+                            data-en="Power is sprinting speed right now. Energy is stamina over the full 90 minutes. A chip can be very fast but burn out the team budget."
+                            data-de="Leistung ist die Sprintgeschwindigkeit im Moment. Energie ist die Ausdauer über die vollen 90 Minuten. Ein Chip kann sehr schnell sein, aber das Team-Budget verbrennen."
+                            data-es="La potencia es la velocidad de sprint en este momento. La energía es la resistencia durante los 90 minutos. Un chip puede ser muy rápido pero agotar el presupuesto del equipo."
+                            data-pt="Potência é a velocidade de sprint agora. Energia é o fôlego ao longo dos 90 minutos. Um chip pode ser muito rápido, mas estourar o orçamento do time.">
+                            Power is sprinting speed right now. Energy is stamina over the full 90 minutes. A chip can be very fast but burn out the team budget.
+                        </p>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="💾 Memory"
+                             data-de="💾 Speicher"
+                             data-es="💾 Memoria"
+                             data-pt="💾 Memória">
+                            💾 Memory
+                        </div>
+                        <p
+                            data-en="Where we keep model weights, activations and datasets. Like the tactics board and playbooks — if they don’t fit on the bench, you keep running to the locker room."
+                            data-de="Dort bewahren wir Modellgewichte, Aktivierungen und Datensätze auf. Wie Taktiktafel und Spielbücher – wenn sie nicht auf die Bank passen, musst du ständig in die Kabine rennen."
+                            data-es="Donde guardamos los pesos del modelo, activaciones y conjuntos de datos. Como el tablero táctico y los libros de jugadas: si no caben en el banquillo, tienes que ir corriendo al vestuario."
+                            data-pt="Onde guardamos pesos do modelo, ativações e conjuntos de dados. Como o quadro tático e os cadernos de jogadas – se não cabem no banco, você vive correndo para o vestiário.">
+                            Where we keep model weights, activations and datasets. Like the tactics board and playbooks — if they don’t fit on the bench, you keep running to the locker room.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title"
+                         data-en="Von Neumann Architecture &amp; Bottleneck"
+                         data-de="Von-Neumann-Architektur &amp; Flaschenhals"
+                         data-es="Arquitectura de Von Neumann y cuello de botella"
+                         data-pt="Arquitetura de Von Neumann &amp; gargalo">
+                        Von Neumann Architecture &amp; Bottleneck
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">🏛️ ➔ 🖥️</div>
+                    <p class="step-description"
+                       data-en="Most computers you use follow a Von Neumann design: memory on one side, processor on the other, and data constantly running back and forth between them."
+                       data-de="Die meisten Computer, die du benutzt, folgen dem Von-Neumann-Design: Speicher auf der einen Seite, Prozessor auf der anderen und Daten, die ständig hin- und herwandern."
+                       data-es="La mayoría de los ordenadores que usas siguen el diseño Von Neumann: memoria por un lado, procesador por el otro y datos que van y vienen entre ambos."
+                       data-pt="A maioria dos computadores que você usa segue o modelo de Von Neumann: memória de um lado, processador do outro e dados indo e voltando o tempo todo.">
+                        Most computers you use follow a Von Neumann design: memory on one side, processor on the other,
+                        and data constantly running back and forth between them.
+                    </p>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="🎯 The Classic Trio"
+                             data-de="🎯 Das klassische Trio"
+                             data-es="🎯 El trío clásico"
+                             data-pt="🎯 O trio clássico">
+                            🎯 The Classic Trio
+                        </div>
+                        <ul>
+                            <li>
+                                <strong
+                                    data-en="Memory Unit:"
+                                    data-de="Speichereinheit:"
+                                    data-es="Unidad de memoria:"
+                                    data-pt="Unidade de memória:">
+                                    Memory Unit:
+                                </strong>
+                                <span
+                                    data-en=" Stores numbers, images, model weights, code."
+                                    data-de=" Speichert Zahlen, Bilder, Modellgewichte und Code."
+                                    data-es=" Almacena números, imágenes, pesos del modelo y código."
+                                    data-pt=" Armazena números, imagens, pesos do modelo e código.">
+                                    Stores numbers, images, model weights, code.
+                                </span>
+                            </li>
+                            <li>
+                                <strong
+                                    data-en="Control Unit:"
+                                    data-de="Steuereinheit:"
+                                    data-es="Unidad de control:"
+                                    data-pt="Unidade de controle:">
+                                    Control Unit:
+                                </strong>
+                                <span
+                                    data-en=" Decides which instruction (tactical step) to run next."
+                                    data-de=" Entscheidet, welcher Befehl (taktischer Schritt) als Nächstes ausgeführt wird."
+                                    data-es=" Decide qué instrucción (paso táctico) ejecutar a continuación."
+                                    data-pt=" Decide qual instrução (passo tático) executar em seguida.">
+                                    Decides which instruction (tactical step) to run next.
+                                </span>
+                            </li>
+                            <li>
+                                <strong
+                                    data-en="ALU:"
+                                    data-de="ALU:"
+                                    data-es="ALU:"
+                                    data-pt="ALU:">
+                                    ALU:
+                                </strong>
+                                <span
+                                    data-en=" Arithmetic Logic Unit — does the math (add, multiply, compare)."
+                                    data-de=" Arithmetisch-logische Einheit – macht die Rechnungen (addieren, multiplizieren, vergleichen)."
+                                    data-es=" Unidad Lógica Aritmética — hace las cuentas (sumar, multiplicar, comparar)."
+                                    data-pt=" Unidade Lógica Aritmética — faz as contas (somar, multiplicar, comparar).">
+                                    Arithmetic Logic Unit — does the math (add, multiply, compare).
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="🚧 Von Neumann Bottleneck"
+                             data-de="🚧 Von-Neumann-Flaschenhals"
+                             data-es="🚧 Cuello de botella de Von Neumann"
+                             data-pt="🚧 Gargalo de Von Neumann">
+                            🚧 Von Neumann Bottleneck
+                        </div>
+                        <p
+                            data-en="The slow part is often not the math, but moving data in and out of memory. AI accelerators try to reuse data on-chip and do a lot of math every time data moves."
+                            data-de="Der langsame Teil ist oft nicht die Rechnung selbst, sondern das Hin- und Herschaufeln der Daten zum Speicher. KI-Beschleuniger versuchen, Daten auf dem Chip wiederzuverwenden und bei jedem Datentransfer viel Rechenarbeit zu erledigen."
+                            data-es="La parte lenta a menudo no es la matemática, sino mover datos dentro y fuera de la memoria. Los aceleradores de IA intentan reutilizar datos en el chip y hacer mucha matemática cada vez que los datos se mueven."
+                            data-pt="A parte lenta muitas vezes não é a conta em si, mas mover dados para dentro e fora da memória. Aceleradores de IA tentam reutilizar dados no chip e fazer muita conta toda vez que os dados se movem.">
+                            The slow part is often not the math, but moving data in and out of memory. AI accelerators try to reuse data on-chip and do a lot of math every time data moves.
+                        </p>
+                        <ul style="margin-top:4px;">
+                            <li
+                                data-en="Reuse data as much as possible on-chip (keep the ball in tight triangles)."
+                                data-de="Daten so weit wie möglich auf dem Chip wiederverwenden (den Ball in engen Dreiecken laufen lassen)."
+                                data-es="Reutilizar los datos tanto como sea posible en el chip (mantener el balón en triángulos cerrados)."
+                                data-pt="Reutilizar ao máximo os dados no chip (manter a bola em triângulos curtos).">
+                                Reuse data as much as possible on-chip (keep the ball in tight triangles).
+                            </li>
+                            <li
+                                data-en="Do a LOT of math each time data moves (make every pass count)."
+                                data-de="Sehr viel Rechenarbeit erledigen, wenn Daten bewegt werden (jeder Pass muss zählen)."
+                                data-es="Hacer MUCHAS operaciones cada vez que los datos se mueven (que cada pase cuente)."
+                                data-pt="Fazer MUITA conta sempre que os dados se movem (fazer cada passe valer a pena).">
+                                Do a LOT of math each time data moves (make every pass count).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: CPU -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title"
+                         data-en="CPU – One-By-One Shooting Drill 🧠"
+                         data-de="CPU – Torschuss-Drill nacheinander 🧠"
+                         data-es="CPU – Tiro a puerta uno por uno 🧠"
+                         data-pt="CPU – Finalização um de cada vez 🧠">
+                        CPU – One-By-One Shooting Drill 🧠
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">🧠 ➔ ⚽</div>
+                    <p class="step-description"
+                       data-en="The CPU is like a star playmaker running a finishing drill: one player, one ball, one shot at a time. Everyone else waits in line until it’s their turn."
+                       data-de="Die CPU ist wie ein Spielmacher im Torschusstraining: ein Spieler, ein Ball, ein Schuss zurzeit. Alle anderen warten in der Schlange, bis sie dran sind."
+                       data-es="La CPU es como un mediocampista estrella en un ejercicio de definición: un jugador, un balón y un tiro cada vez. El resto espera en la fila hasta su turno."
+                       data-pt="A CPU é como o camisa 10 em um treino de finalização: um jogador, uma bola, um chute por vez. O resto do time espera na fila.">
+                        The CPU is like a star playmaker running a finishing drill: one player, one ball, one shot at a time.
+                        Everyone else waits in line until it’s their turn.
+                    </p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="✅ CPU Strengths"
+                                data-de="✅ Stärken der CPU"
+                                data-es="✅ Fortalezas de la CPU"
+                                data-pt="✅ Pontos fortes da CPU">
+                                ✅ CPU Strengths
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Great at complex decisions and “if this, then that” tactics"
+                                    data-de="Sehr gut bei komplexen Entscheidungen und „wenn dies, dann das“-Taktiken"
+                                    data-es="Muy buena en decisiones complejas y tácticas de “si esto, entonces aquello”"
+                                    data-pt="Ótima para decisões complexas e táticas “se isso, então aquilo”">
+                                    Great at complex decisions and “if this, then that” tactics
+                                </li>
+                                <li
+                                    data-en="Strong for small models and general programs"
+                                    data-de="Stark für kleine Modelle und allgemeine Programme"
+                                    data-es="Fuerte para modelos pequeños y programas generales"
+                                    data-pt="Forte para modelos pequenos e programas gerais">
+                                    Strong for small models and general programs
+                                </li>
+                                <li
+                                    data-en="Great single-thread performance (one player executing perfectly)"
+                                    data-de="Sehr gute Single-Thread-Performance (ein Spieler führt perfekt aus)"
+                                    data-es="Gran rendimiento en un solo hilo (un jugador ejecutando perfectamente)"
+                                    data-pt="Ótimo desempenho em um único thread (um jogador executando perfeitamente)">
+                                    Great single-thread performance (one player executing perfectly)
+                                </li>
+                                <li
+                                    data-en="Perfect for orchestration and data loading (coach of the whole team)"
+                                    data-de="Ideal für Orchestrierung und Datenladen (Trainer des gesamten Teams)"
+                                    data-es="Perfecta para orquestación y carga de datos (el entrenador de todo el equipo)"
+                                    data-pt="Perfeita para orquestrar e carregar dados (o técnico do time todo)">
+                                    Perfect for orchestration and data loading (coach of the whole team)
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4
+                                data-en="⚠️ CPU Limits for Big AI"
+                                data-de="⚠️ CPU-Grenzen für große KI"
+                                data-es="⚠️ Límites de la CPU para IA grande"
+                                data-pt="⚠️ Limitações da CPU para IA grande">
+                                ⚠️ CPU Limits for Big AI
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Struggles with huge matrix multiplications (full-team drills)"
+                                    data-de="Schwer mit riesigen Matrixmultiplikationen (Ganzmannschafts-Drills)"
+                                    data-es="Le cuesta con multiplicaciones de matrices enormes (ejercicios de todo el equipo)"
+                                    data-pt="Dificuldade com multiplicações de matrizes enormes (treinos com o time inteiro)">
+                                    Struggles with huge matrix multiplications (full-team drills)
+                                </li>
+                                <li
+                                    data-en="Too few lanes for massive batches of data"
+                                    data-de="Zu wenige „Spuren“ für riesige Datenbatches"
+                                    data-es="Muy pocos carriles para grandes lotes de datos"
+                                    data-pt="Poucas “faixas” para lotes gigantes de dados">
+                                    Too few lanes for massive batches of data
+                                </li>
+                                <li
+                                    data-en="Big models overflow cache and hit slow RAM"
+                                    data-de="Große Modelle sprengen den Cache und landen im langsamen RAM"
+                                    data-es="Los modelos grandes desbordan la caché y acaban en una RAM lenta"
+                                    data-pt="Modelos grandes estouram o cache e caem na RAM lenta">
+                                    Big models overflow cache and hit slow RAM
+                                </li>
+                                <li
+                                    data-en="Training deep nets can feel like extra time + penalties"
+                                    data-de="Training tiefer Netze fühlt sich an wie Verlängerung plus Elfmeterschießen"
+                                    data-es="Entrenar redes profundas puede sentirse como prórroga + penaltis"
+                                    data-pt="Treinar redes profundas pode parecer prorrogação + pênaltis">
+                                    Training deep nets can feel like extra time + penalties
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="simulation-container">
+                        <div class="simulation-title"
+                             data-en="CPU Drill – One Player Shoots at a Time"
+                             data-de="CPU-Drill – Ein Spieler schießt nach dem anderen"
+                             data-es="Ejercicio CPU – Un jugador tira cada vez"
+                             data-pt="Treino da CPU – Um jogador chuta por vez">
+                            CPU Drill – One Player Shoots at a Time
+                        </div>
+                        <p style="text-align:center; color:var(--ink-1); margin-bottom:6px; font-size:0.88rem;"
+                           data-en="Each emoji is a player in the shooting queue. The CPU lets one player at a time take a shot on goal."
+                           data-de="Jedes Emoji ist ein Spieler in der Schuss-Schlange. Die CPU lässt immer nur einen Spieler auf das Tor schießen."
+                           data-es="Cada emoji es un jugador en la fila de tiro. La CPU deja que solo un jugador dispare a puerta cada vez."
+                           data-pt="Cada emoji é um jogador na fila de finalização. A CPU deixa apenas um jogador chutar ao gol por vez.">
+                            Each emoji is a player in the shooting queue. The CPU lets <strong>one player at a time</strong> take a shot on goal.
+                        </p>
+                        <div class="processor-demo">
+                            <h4
+                                data-en="CPU Finishing Line 🧑‍🦱⚽🥅"
+                                data-de="CPU-Abschlusslinie 🧑‍🦱⚽🥅"
+                                data-es="Fila de remates de la CPU 🧑‍🦱⚽🥅"
+                                data-pt="Fila de finalização da CPU 🧑‍🦱⚽🥅">
+                                CPU Finishing Line 🧑‍🦱⚽🥅
+                            </h4>
+                            <div class="demo-canvas" id="cpuCanvas"></div>
+                            <div style="font-size: 0.8rem; margin-bottom: 6px;">
+                                <span
+                                    data-en="Legend:"
+                                    data-de="Legende:"
+                                    data-es="Leyenda:"
+                                    data-pt="Legenda:">
+                                    Legend:
+                                </span>
+                                <span style="display:inline-block;width:12px;height:12px;background:#e5e7eb;border-radius:50%;margin:0 4px 0 6px;"></span>
+                                <span
+                                    data-en="waiting in line"
+                                    data-de="wartet in der Schlange"
+                                    data-es="esperando en la fila"
+                                    data-pt="esperando na fila">
+                                    waiting in line
+                                </span>
+                                <span style="display:inline-block;width:12px;height:12px;background:#fbbf24;border-radius:50%;margin:0 4px;"></span>
+                                <span
+                                    data-en="currently shooting"
+                                    data-de="schießt gerade"
+                                    data-es="disparando ahora"
+                                    data-pt="chutando agora">
+                                    currently shooting
+                                </span>
+                                <span style="display:inline-block;width:12px;height:12px;background:#bbf7d0;border-radius:50%;margin:0 4px;"></span>
+                                <span
+                                    data-en="finished their shot"
+                                    data-de="hat seinen Schuss abgeschlossen"
+                                    data-es="ya terminó su tiro"
+                                    data-pt="terminou o chute">
+                                    finished their shot
+                                </span>
+                            </div>
+                            <button class="control-btn" onclick="runCpuSim(event, this)"
+                                data-en="▶ Run Shooting Drill"
+                                data-de="▶ Torschuss-Drill starten"
+                                data-es="▶ Ejecutar ejercicio de tiro"
+                                data-pt="▶ Iniciar treino de finalização">
+                                ▶ Run Shooting Drill
+                            </button>
+                            <div style="margin-top:6px;font-size:0.8rem;color:var(--ink-1);" id="cpuCaption">
+                                CPU: “Okay, strikers – one at a time to the edge of the box!”
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: GPU -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title"
+                         data-en="GPU – Full-Team Training Drill 🎮"
+                         data-de="GPU – Ganzes Team im Trainings-Drill 🎮"
+                         data-es="GPU – Ejercicio de equipo completo 🎮"
+                         data-pt="GPU – Treino com o time inteiro 🎮">
+                        GPU – Full-Team Training Drill 🎮
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">🎮 ➔ 🏟️</div>
+                    <p class="step-description"
+                       data-en="A GPU is like running a high-intensity drill where the whole team practices finishes at once: many balls, many players, many shots in parallel."
+                       data-de="Eine GPU ist wie ein intensiver Drill, bei dem das ganze Team gleichzeitig Abschlüsse trainiert: viele Bälle, viele Spieler, viele Schüsse parallel."
+                       data-es="Una GPU es como un ejercicio de alta intensidad donde todo el equipo practica remates a la vez: muchos balones, muchos jugadores, muchos tiros en paralelo."
+                       data-pt="Uma GPU é como um treino intenso em que o time inteiro finaliza ao mesmo tempo: muitas bolas, muitos jogadores, muitos chutes em paralelo.">
+                        A GPU is like running a high-intensity drill where the <strong>whole team</strong> practices finishes at once:
+                        many balls, many players, many shots in parallel.
+                    </p>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="⚡ SIMT: Single Instruction, Multiple Threads"
+                             data-de="⚡ SIMT: Single Instruction, Multiple Threads"
+                             data-es="⚡ SIMT: Single Instruction, Multiple Threads"
+                             data-pt="⚡ SIMT: Single Instruction, Multiple Threads">
+                            ⚡ SIMT: Single Instruction, Multiple Threads
+                        </div>
+                        <p
+                            data-en="One training pattern (“shoot from the edge of the box”) applied to many players at once. Perfect for matrix multiplications: same operation, lots of data."
+                            data-de="Ein Trainingsmuster („Schuss von der Strafraumkante“) wird gleichzeitig auf viele Spieler angewendet. Perfekt für Matrixmultiplikationen: gleiche Operation, viele Daten."
+                            data-es="Un mismo patrón de entrenamiento (“disparar desde la frontal del área”) aplicado a muchos jugadores a la vez. Perfecto para multiplicaciones de matrices: misma operación, muchos datos."
+                            data-pt="Um padrão de treino (“chutar da entrada da área”) aplicado a muitos jogadores ao mesmo tempo. Perfeito para multiplicações de matrizes: mesma operação, muitos dados.">
+                            One training pattern (“shoot from the edge of the box”) applied to many players at once. Perfect for matrix multiplications: same operation, lots of data.
+                        </p>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="🚀 GPU Advantages"
+                                data-de="🚀 GPU-Vorteile"
+                                data-es="🚀 Ventajas de la GPU"
+                                data-pt="🚀 Vantagens da GPU">
+                                🚀 GPU Advantages
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Massive parallelism (whole squad moving together)"
+                                    data-de="Massive Parallelität (die ganze Mannschaft bewegt sich gemeinsam)"
+                                    data-es="Paralelismo masivo (toda la plantilla moviéndose a la vez)"
+                                    data-pt="Paralelismo massivo (todo o time se move junto)">
+                                    Massive parallelism (whole squad moving together)
+                                </li>
+                                <li
+                                    data-en="Excellent for big batches and matrix math"
+                                    data-de="Hervorragend für große Batches und Matrixrechnungen"
+                                    data-es="Excelente para lotes grandes y matemática de matrices"
+                                    data-pt="Excelente para lotes grandes e matemática de matrizes">
+                                    Excellent for big batches and matrix math
+                                </li>
+                                <li
+                                    data-en="Huge speedups for training &amp; inference"
+                                    data-de="Enorme Beschleunigung für Training & Inferenz"
+                                    data-es="Grandes aceleraciones para entrenamiento e inferencia"
+                                    data-pt="Grandes ganhos de velocidade no treino e na inferência">
+                                    Huge speedups for training &amp; inference
+                                </li>
+                                <li
+                                    data-en="Deep-learning libraries are heavily optimized for GPUs"
+                                    data-de="Deep-Learning-Bibliotheken sind stark auf GPUs optimiert"
+                                    data-es="Las librerías de deep learning están muy optimizadas para GPUs"
+                                    data-pt="As bibliotecas de deep learning são fortemente otimizadas para GPUs">
+                                    Deep-learning libraries are heavily optimized for GPUs
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4
+                                data-en="❌ GPU Trade-offs"
+                                data-de="❌ GPU-Kompromisse"
+                                data-es="❌ Desventajas de la GPU"
+                                data-pt="❌ Compromissos da GPU">
+                                ❌ GPU Trade-offs
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Uses more power (like high-intensity pressing)"
+                                    data-de="Verbraucht mehr Strom (wie intensives Pressing)"
+                                    data-es="Consume más energía (como una presión alta e intensa)"
+                                    data-pt="Consome mais energia (como uma pressão alta e intensa)">
+                                    Uses more power (like high-intensity pressing)
+                                </li>
+                                <li
+                                    data-en="Less flexible for weird, branching tactics"
+                                    data-de="Weniger flexibel für verzweigte, ungewöhnliche Taktiken"
+                                    data-es="Menos flexible para tácticas raras con muchas bifurcaciones"
+                                    data-pt="Menos flexível para táticas esquisitas e cheias de desvios">
+                                    Less flexible for weird, branching tactics
+                                </li>
+                                <li
+                                    data-en="More complex to “coach” at low level"
+                                    data-de="Auf niedriger Ebene schwieriger zu „coachen“"
+                                    data-es="Más compleja de “entrenar” a bajo nivel"
+                                    data-pt="Mais complexa de “treinar” em baixo nível">
+                                    More complex to “coach” at low level
+                                </li>
+                                <li
+                                    data-en="Still limited by VRAM size and bandwidth (pitch size &amp; rules)"
+                                    data-de="Weiterhin begrenzt durch VRAM-Größe und Bandbreite (Platzgröße &amp; Regeln)"
+                                    data-es="Sigue limitada por el tamaño de la VRAM y el ancho de banda (tamaño del campo y reglas)"
+                                    data-pt="Ainda limitada pelo tamanho da VRAM e pela largura de banda (tamanho de campo e regras)">
+                                    Still limited by VRAM size and bandwidth (pitch size &amp; rules)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="simulation-container">
+                        <div class="simulation-title"
+                             data-en="GPU Drill – Whole Team Shoots Together"
+                             data-de="GPU-Drill – Ganzes Team schießt gemeinsam"
+                             data-es="Ejercicio GPU – Todo el equipo tira junto"
+                             data-pt="Treino da GPU – Time inteiro chuta junto">
+                            GPU Drill – Whole Team Shoots Together
+                        </div>
+                        <p style="text-align:center; color:var(--ink-1); margin-bottom:6px; font-size:0.88rem;"
+                           data-en="Imagine several goals and lots of balls. When the GPU drill runs, many players shoot at once."
+                           data-de="Stell dir mehrere Tore und viele Bälle vor. Wenn der GPU-Drill läuft, schießen viele Spieler gleichzeitig."
+                           data-es="Imagina varias porterías y muchos balones. Cuando se ejecuta el ejercicio GPU, muchos jugadores disparan a la vez."
+                           data-pt="Imagine vários gols e muitas bolas. Quando o treino da GPU começa, muitos jogadores chutam ao mesmo tempo.">
+                            Imagine several goals and lots of balls. When the GPU drill runs, <strong>many players shoot at once</strong>.
+                        </p>
+                        <div class="processor-demo">
+                            <h4
+                                data-en="GPU Team Finishing 🧑‍🦱⚽⚽⚽"
+                                data-de="GPU-Teamabschluss 🧑‍🦱⚽⚽⚽"
+                                data-es="Definición en equipo con GPU 🧑‍🦱⚽⚽⚽"
+                                data-pt="Finalização em equipe na GPU 🧑‍🦱⚽⚽⚽">
+                                GPU Team Finishing 🧑‍🦱⚽⚽⚽
+                            </h4>
+                            <div class="demo-canvas" id="gpuCanvas"></div>
+                            <div style="font-size: 0.85rem; margin-bottom: 6px; color:var(--ink-1);"
+                                 data-en="When the drill starts, many players go from “waiting” to “shooting” to “done” almost together."
+                                 data-de="Wenn der Drill startet, wechseln viele Spieler fast gleichzeitig von „wartend“ zu „schießend“ und „fertig“."
+                                 data-es="Cuando empieza el ejercicio, muchos jugadores pasan casi a la vez de “esperando” a “disparando” y “terminado”."
+                                 data-pt="Quando o treino começa, muitos jogadores passam quase ao mesmo tempo de “esperando” para “chutando” e “terminou”.">
+                                When the drill starts, many players go from “waiting” to “shooting” to “done” almost together.
+                            </div>
+                            <button class="control-btn" onclick="runGpuSim(event, this)"
+                                data-en="⚡ Run Team Drill"
+                                data-de="⚡ Team-Drill starten"
+                                data-es="⚡ Ejecutar ejercicio en equipo"
+                                data-pt="⚡ Iniciar treino em equipe">
+                                ⚡ Run Team Drill
+                            </button>
+                            <div style="margin-top:6px;font-size:0.8rem;color:var(--ink-1);" id="gpuCaption">
+                                GPU: “Everyone grab a ball – we finish as a unit!”
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: TPU & FPGA -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title"
+                         data-en="TPU &amp; FPGA – Tiki-Taka Grid &amp; Shape-Shifter ⚡"
+                         data-de="TPU &amp; FPGA – Tiki-Taka-Gitter &amp; Formwandler ⚡"
+                         data-es="TPU y FPGA – Cuadrícula tiki-taka y camaleón táctico ⚡"
+                         data-pt="TPU &amp; FPGA – Grelha tiki-taka &amp; camaleão tático ⚡">
+                        TPU &amp; FPGA – Tiki-Taka Grid &amp; Shape-Shifter ⚡
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">⚡ ➔ 🔄</div>
+                    <p class="step-description"
+                       data-en="TPUs are like a perfectly drilled tiki-taka passing grid: the ball moves in waves across a tight formation. FPGAs are like a team that can completely change its shape for each opponent."
+                       data-de="TPUs sind wie ein perfekt eingespieltes Tiki-Taka-Passgitter: Der Ball bewegt sich in Wellen durch eine enge Formation. FPGAs sind wie ein Team, das seine Formation für jeden Gegner komplett ändern kann."
+                       data-es="Las TPUs son como una cuadrícula de pases tiki-taka perfectamente entrenada: el balón se mueve en oleadas por una formación compacta. Las FPGAs son como un equipo que cambia de forma para cada rival."
+                       data-pt="As TPUs são como uma grade de passes tiki-taka bem treinada: a bola se move em ondas por uma formação compacta. As FPGAs são como um time que muda totalmente de forma para cada adversário.">
+                        TPUs are like a perfectly drilled tiki-taka passing grid: the ball moves in waves across a tight formation.
+                        FPGAs are like a team that can completely change its shape for each opponent.
+                    </p>
+
+                    <div class="simulation-container">
+                        <div class="simulation-title"
+                             data-en="TPU Passing Grid – Tiki-Taka Wave"
+                             data-de="TPU-Passgitter – Tiki-Taka-Welle"
+                             data-es="Cuadrícula de pases TPU – Ola tiki-taka"
+                             data-pt="Grade de passes da TPU – onda tiki-taka">
+                            TPU Passing Grid – Tiki-Taka Wave
+                        </div>
+                        <p style="text-align:center; color:var(--ink-1); margin-bottom:6px; font-size:0.88rem;"
+                           data-en="Each circle is a player in a tight passing grid. The highlight shows a passing wave moving diagonally — just like the ball flowing through a choreographed pattern."
+                           data-de="Jeder Kreis ist ein Spieler in einem engen Passgitter. Die Hervorhebung zeigt eine diagonale Passwelle – so wie der Ball durch eine einstudierte Kombination läuft."
+                           data-es="Cada círculo es un jugador en una cuadrícula de pases compacta. El resaltado muestra una ola de pase diagonal, como el balón fluyendo por una jugada ensayada."
+                           data-pt="Cada círculo é um jogador em uma grade de passes apertada. O destaque mostra uma onda de passes na diagonal – como a bola fluindo por uma jogada ensaiada.">
+                            Each circle is a player in a tight passing grid. The highlight shows a passing <strong>wave</strong> moving diagonally
+                            — just like the ball flowing through a choreographed pattern.
+                        </p>
+                        <div class="processor-demo">
+                            <h4
+                                data-en="TPU Passing Pattern 🔵⚽"
+                                data-de="TPU-Passmuster 🔵⚽"
+                                data-es="Patrón de pases TPU 🔵⚽"
+                                data-pt="Padrão de passes da TPU 🔵⚽">
+                                TPU Passing Pattern 🔵⚽
+                            </h4>
+                            <div class="tpu-grid" id="tpuGrid"></div>
+                            <div style="font-size: 0.85rem; margin-bottom: 6px; color: var(--ink-1);"
+                                 data-en="Instead of random chaos, the whole grid follows a repeating “pass to your diagonal teammate” wave."
+                                 data-de="Statt zufälligem Chaos folgt das gesamte Gitter einer wiederholten „Pass zu deinem diagonalen Mitspieler“-Welle."
+                                 data-es="En lugar de caos aleatorio, toda la cuadrícula sigue una ola repetida de “pasa a tu compañero en diagonal”."
+                                 data-pt="Em vez de caos aleatório, toda a grade segue uma onda repetida de “passe para o colega na diagonal”.">
+                                Instead of random chaos, the whole grid follows a repeating “pass to your diagonal teammate” wave.
+                            </div>
+                            <button class="control-btn" onclick="runTpuDance(event, this)"
+                                data-en="🎵 Run Passing Pattern"
+                                data-de="🎵 Passmuster starten"
+                                data-es="🎵 Ejecutar patrón de pases"
+                                data-pt="🎵 Iniciar padrão de passes">
+                                🎵 Run Passing Pattern
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="🔷 TPU Snapshot"
+                                data-de="🔷 TPU im Überblick"
+                                data-es="🔷 Resumen de la TPU"
+                                data-pt="🔷 Visão geral da TPU">
+                                🔷 TPU Snapshot
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Designed by Google purely for tensor math"
+                                    data-de="Von Google speziell für Tensor-Mathematik entwickelt"
+                                    data-es="Diseñada por Google exclusivamente para matemáticas tensoriales"
+                                    data-pt="Projetada pelo Google exclusivamente para matemática de tensores">
+                                    Designed by Google purely for tensor math
+                                </li>
+                                <li
+                                    data-en="Uses systolic arrays to reuse data like a passing triangle"
+                                    data-de="Verwendet systolische Arrays, um Daten wie in einem Passdreieck wiederzuverwenden"
+                                    data-es="Usa arreglos sistólicos para reutilizar datos como un triángulo de pase"
+                                    data-pt="Usa matrizes sistólicas para reutilizar dados como um triângulo de passes">
+                                    Uses systolic arrays to reuse data like a passing triangle
+                                </li>
+                                <li
+                                    data-en="Great performance per watt on big models"
+                                    data-de="Großartige Leistung pro Watt bei großen Modellen"
+                                    data-es="Gran rendimiento por vatio en modelos grandes"
+                                    data-pt="Ótimo desempenho por watt em modelos grandes">
+                                    Great performance per watt on big models
+                                </li>
+                                <li
+                                    data-en="Mostly accessed through Google Cloud"
+                                    data-de="Meistens über Google Cloud verfügbar"
+                                    data-es="Se accede principalmente a través de Google Cloud"
+                                    data-pt="Acessada principalmente via Google Cloud">
+                                    Mostly accessed through Google Cloud
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4
+                                data-en="🔧 FPGA Snapshot"
+                                data-de="🔧 FPGA im Überblick"
+                                data-es="🔧 Resumen de la FPGA"
+                                data-pt="🔧 Visão geral da FPGA">
+                                🔧 FPGA Snapshot
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Hardware you can “rewire” with code (change formation)"
+                                    data-de="Hardware, die du mit Code „neu verdrahten“ kannst (Formation ändern)"
+                                    data-es="Hardware que puedes “re cablear” con código (cambiar la formación)"
+                                    data-pt="Hardware que você pode “reconfigurar” com código (mudar a formação)">
+                                    Hardware you can “rewire” with code (change formation)
+                                </li>
+                                <li
+                                    data-en="Super low latency for streaming data (instant counters)"
+                                    data-de="Sehr geringe Latenz für Streaming-Daten (sofortige Konter)"
+                                    data-es="Latencia muy baja para datos en streaming (contraataques instantáneos)"
+                                    data-pt="Latência super baixa para dados em fluxo (contra-ataques instantâneos)">
+                                    Super low latency for streaming data (instant counters)
+                                </li>
+                                <li
+                                    data-en="Used in finance, radios, robotics, networking"
+                                    data-de="Einsatz in Finanzen, Funktechnik, Robotik, Netzwerken"
+                                    data-es="Usada en finanzas, radio, robótica y redes"
+                                    data-pt="Usada em finanças, rádios, robótica e redes">
+                                    Used in finance, radios, robotics, networking
+                                </li>
+                                <li
+                                    data-en="Harder to program, but extremely flexible"
+                                    data-de="Schwieriger zu programmieren, aber extrem flexibel"
+                                    data-es="Más difícil de programar, pero extremadamente flexible"
+                                    data-pt="Mais difícil de programar, mas extremamente flexível">
+                                    Harder to program, but extremely flexible
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 6: Cloud vs Edge + Hardware Race -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title"
+                         data-en="Cloud, Robots &amp; Hardware Race 🏁"
+                         data-de="Cloud, Roboter &amp; Hardware-Rennen 🏁"
+                         data-es="Nube, robots y carrera de hardware 🏁"
+                         data-pt="Nuvem, robôs &amp; corrida de hardware 🏁">
+                        Cloud, Robots &amp; Hardware Race 🏁
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">☁️ ➔ 🤖</div>
+                    <p class="step-description"
+                       data-en="You don't just pick a chip — you pick where that chip lives: in your laptop, in a robot, or in the cloud."
+                       data-de="Du wählst nicht nur einen Chip – du wählst auch, wo er lebt: im Laptop, im Roboter oder in der Cloud."
+                       data-es="No solo eliges un chip: eliges dónde vive ese chip: en tu portátil, en un robot o en la nube."
+                       data-pt="Você não escolhe só o chip – escolhe também onde ele vive: no laptop, no robô ou na nuvem.">
+                        You don't just pick a chip — you pick <strong>where</strong> that chip lives:
+                        in your laptop, in a robot, or in the cloud.
+                    </p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="☁️ Central “Center” (Cloud/Server)"
+                                data-de="☁️ Zentrales „Zentrum“ (Cloud/Server)"
+                                data-es="☁️ “Centro” central (nube/servidor)"
+                                data-pt="☁️ “Centro” central (nuvem/servidor)">
+                                ☁️ Central “Center” (Cloud/Server)
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Many robots or apps talk to a powerful server"
+                                    data-de="Viele Roboter oder Apps sprechen mit einem leistungsstarken Server"
+                                    data-es="Muchos robots o apps se comunican con un servidor potente"
+                                    data-pt="Muitos robôs ou apps falam com um servidor potente">
+                                    Many robots or apps talk to a powerful server
+                                </li>
+                                <li
+                                    data-en="Server has big GPUs/TPUs for heavy models"
+                                    data-de="Server hat große GPUs/TPUs für schwere Modelle"
+                                    data-es="El servidor tiene grandes GPUs/TPUs para modelos pesados"
+                                    data-pt="O servidor tem grandes GPUs/TPUs para modelos pesados">
+                                    Server has big GPUs/TPUs for heavy models
+                                </li>
+                                <li
+                                    data-en="Data must travel over network (adds latency)"
+                                    data-de="Daten müssen über das Netzwerk reisen (erzeugt Latenz)"
+                                    data-es="Los datos deben viajar por la red (añade latencia)"
+                                    data-pt="Os dados precisam viajar pela rede (adiciona latência)">
+                                    Data must travel over network (adds latency)
+                                </li>
+                                <li
+                                    data-en="Good for big brains, not instant reactions"
+                                    data-de="Gut für „große Gehirne“, nicht für sofortige Reaktionen"
+                                    data-es="Bueno para “grandes cerebros”, no para reacciones instantáneas"
+                                    data-pt="Bom para “grandes cérebros”, não para reações instantâneas">
+                                    Good for big brains, not instant reactions
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4
+                                data-en="📍 On-device (“Robot” / Edge)"
+                                data-de="📍 Lokal („Roboter“ / Edge)"
+                                data-es="📍 En el dispositivo (“robot” / edge)"
+                                data-pt="📍 No dispositivo (“robô” / edge)">
+                                📍 On-device (“Robot” / Edge)
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Model runs directly on the phone/robot"
+                                    data-de="Modell läuft direkt auf dem Handy/Roboter"
+                                    data-es="El modelo se ejecuta directamente en el móvil/robot"
+                                    data-pt="O modelo roda diretamente no celular/robô">
+                                    Model runs directly on the phone/robot
+                                </li>
+                                <li
+                                    data-en="Very low latency, works without internet"
+                                    data-de="Sehr geringe Latenz, funktioniert ohne Internet"
+                                    data-es="Latencia muy baja, funciona sin internet"
+                                    data-pt="Latência muito baixa, funciona sem internet">
+                                    Very low latency, works without internet
+                                </li>
+                                <li
+                                    data-en="Each device needs its own hardware"
+                                    data-de="Jedes Gerät braucht seine eigene Hardware"
+                                    data-es="Cada dispositivo necesita su propio hardware"
+                                    data-pt="Cada dispositivo precisa do seu próprio hardware">
+                                    Each device needs its own hardware
+                                </li>
+                                <li
+                                    data-en="Great for safety-critical real-time tasks"
+                                    data-de="Ideal für sicherheitskritische Echtzeitaufgaben"
+                                    data-es="Ideal para tareas en tiempo real críticas para la seguridad"
+                                    data-pt="Ótimo para tarefas em tempo real críticas de segurança">
+                                    Great for safety-critical real-time tasks
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="🤝 Hybrid Setup"
+                             data-de="🤝 Hybrides Setup"
+                             data-es="🤝 Configuración híbrida"
+                             data-pt="🤝 Configuração híbrida">
+                            🤝 Hybrid Setup
+                        </div>
+                        <p
+                            data-en="A common real-world setup:"
+                            data-de="Ein häufiges Setup in der Praxis:"
+                            data-es="Una configuración muy común en el mundo real:"
+                            data-pt="Uma configuração bem comum no mundo real:">
+                            A common real-world setup:
+                        </p>
+                        <ul style="margin-top:4px;">
+                            <li
+                                data-en="Fast reflexes (e.g. braking, collision avoidance) on the robot."
+                                data-de="Schnelle Reflexe (z. B. Bremsen, Kollisionsvermeidung) auf dem Roboter."
+                                data-es="Reflejos rápidos (p. ej., frenar, evitar colisiones) en el robot."
+                                data-pt="Reflexos rápidos (por exemplo, frear, evitar colisões) no robô.">
+                                Fast "reflexes" (e.g. braking, collision avoidance) on the robot.
+                            </li>
+                            <li
+                                data-en="Heavy thinking (mapping, big planning, retraining) in the center/cloud."
+                                data-de="Schwere Denkaufgaben (Kartierung, große Planung, Retraining) im Zentrum/in der Cloud."
+                                data-es="El pensamiento pesado (mapeo, gran planificación, reentrenamiento) en el centro/nube."
+                                data-pt="Pensamento pesado (mapeamento, planejamento grande, re-treino) no centro/na nuvem.">
+                                Heavy thinking (mapping, big planning, retraining) in the center/cloud.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="simulation-container" style="margin-top: 14px;">
+                        <div class="simulation-title"
+                             data-en="CPU vs GPU vs TPU Race"
+                             data-de="CPU vs GPU vs TPU – das Rennen"
+                             data-es="Carrera CPU vs GPU vs TPU"
+                             data-pt="Corrida CPU vs GPU vs TPU">
+                            CPU vs GPU vs TPU Race
+                        </div>
+                        <p style="text-align:center; font-size:0.86rem; color:var(--ink-1); margin-bottom:8px;"
+                           data-en="Imagine each bar is 100 goal-scoring chances to process. Who finishes first?"
+                           data-de="Stell dir vor, jeder Balken sind 100 Torchancen, die verarbeitet werden müssen. Wer ist zuerst fertig?"
+                           data-es="Imagina que cada barra son 100 ocasiones de gol que procesar. ¿Quién termina primero?"
+                           data-pt="Imagine que cada barra são 100 chances de gol para processar. Quem termina primeiro?">
+                            Imagine each bar is 100 goal-scoring chances to process. Who finishes first?
+                        </p>
+
+                        <div class="race-row">
+                            <div class="race-label"
+                                 data-en="CPU 🧠 (one play at a time)"
+                                 data-de="CPU 🧠 (eine Aktion nach der anderen)"
+                                 data-es="CPU 🧠 (una jugada cada vez)"
+                                 data-pt="CPU 🧠 (uma jogada por vez)">
+                                CPU 🧠 (one play at a time)
+                            </div>
+                            <div class="race-track">
+                                <div class="race-bar cpu-bar"></div>
+                            </div>
+                            <div class="race-status" id="cpuRaceStatus">Ready</div>
+                        </div>
+
+                        <div class="race-row">
+                            <div class="race-label"
+                                 data-en="GPU 🎮 (many plays in parallel)"
+                                 data-de="GPU 🎮 (viele Aktionen parallel)"
+                                 data-es="GPU 🎮 (muchas jugadas en paralelo)"
+                                 data-pt="GPU 🎮 (muitas jogadas em paralelo)">
+                                GPU 🎮 (many plays in parallel)
+                            </div>
+                            <div class="race-track">
+                                <div class="race-bar gpu-bar"></div>
+                            </div>
+                            <div class="race-status" id="gpuRaceStatus">Ready</div>
+                        </div>
+
+                        <div class="race-row">
+                            <div class="race-label"
+                                 data-en="TPU ⚡ (optimized passing engine)"
+                                 data-de="TPU ⚡ (optimierter Passmotor)"
+                                 data-es="TPU ⚡ (motor de pases optimizado)"
+                                 data-pt="TPU ⚡ (motor de passes otimizado)">
+                                TPU ⚡ (optimized passing engine)
+                            </div>
+                            <div class="race-track">
+                                <div class="race-bar tpu-bar"></div>
+                            </div>
+                            <div class="race-status" id="tpuRaceStatus">Ready</div>
+                        </div>
+
+                        <div style="text-align:center; margin-top:8px;">
+                            <button class="control-btn" onclick="startHardwareRace()"
+                                data-en="🏃 Start Race"
+                                data-de="🏃 Rennen starten"
+                                data-es="🏃 Iniciar carrera"
+                                data-pt="🏃 Iniciar corrida">
+                                🏃 Start Race
+                            </button>
+                            <button class="control-btn" onclick="resetHardwareRace()"
+                                data-en="🔄 Reset"
+                                data-de="🔄 Zurücksetzen"
+                                data-es="🔄 Reiniciar"
+                                data-pt="🔄 Repor">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 7: Training vs Inference -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title"
+                         data-en="Training vs Inference 🎓 vs 🚀"
+                         data-de="Training vs Inferenz 🎓 vs 🚀"
+                         data-es="Entrenamiento vs inferencia 🎓 vs 🚀"
+                         data-pt="Treino vs inferência 🎓 vs 🚀">
+                        Training vs Inference 🎓 vs 🚀
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">🎓 ➔ 🚀</div>
+                    <p class="step-description"
+                       data-en="Training is like long weeks of practice — you learn from millions of drills. Inference is match day — you use what you learned, fast."
+                       data-de="Training ist wie lange Übungswochen – du lernst aus Millionen von Drills. Inferenz ist Spieltag – du setzt das Gelernte schnell um."
+                       data-es="El entrenamiento son semanas de práctica: aprendes de millones de ejercicios. La inferencia es el día del partido: usas lo aprendido, rápido."
+                       data-pt="Treinar é como semanas de treino – você aprende com milhões de exercícios. Inferência é dia de jogo – você usa o que aprendeu, rápido.">
+                        Training is like long weeks of practice — you learn from millions of drills.
+                        Inference is match day — you use what you learned, fast.
+                    </p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="🎓 Training (Learning Phase)"
+                                data-de="🎓 Training (Lernphase)"
+                                data-es="🎓 Entrenamiento (fase de aprendizaje)"
+                                data-pt="🎓 Treino (fase de aprendizado)">
+                                🎓 Training (Learning Phase)
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Process millions/billions of examples"
+                                    data-de="Verarbeitet Millionen/ Milliarden von Beispielen"
+                                    data-es="Procesa millones/miles de millones de ejemplos"
+                                    data-pt="Processa milhões/bilhões de exemplos">
+                                    Process millions/billions of examples
+                                </li>
+                                <li
+                                    data-en="Needs forward pass AND backward pass (gradients)"
+                                    data-de="Benötigt Vorwärts- UND Rückwärtsdurchlauf (Gradienten)"
+                                    data-es="Necesita paso hacia adelante Y hacia atrás (gradientes)"
+                                    data-pt="Precisa de forward e backward pass (gradientes)">
+                                    Needs forward pass AND backward pass (gradients)
+                                </li>
+                                <li
+                                    data-en="Stores activations, gradients, optimizer state"
+                                    data-de="Speichert Aktivierungen, Gradienten, Optimizer-Zustand"
+                                    data-es="Almacena activaciones, gradientes y estado del optimizador"
+                                    data-pt="Armazena ativações, gradientes e estado do otimizador">
+                                                                        Stores activations, gradients, optimizer state"
+                                    data-es=" Almacena activaciones, gradientes y el estado del optimizador"
+                                    data-pt=" Armazena ativações, gradientes e o estado do otimizador">
+                                    Stores activations, gradients, optimizer state
+                                </span>
+                            </li>
+                            <li
+                                data-en="Usually done on big GPU/TPU clusters in the cloud"
+                                data-de="Wird meist auf großen GPU/TPU-Clustern in der Cloud ausgeführt"
+                                data-es="Suele hacerse en grandes clústeres de GPU/TPU en la nube"
+                                data-pt="Geralmente feito em grandes clusters de GPU/TPU na nuvem">
+                                Usually done on big GPU/TPU clusters in the cloud
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-card">
+                        <h4
+                            data-en="🚀 Inference (Production Phase)"
+                            data-de="🚀 Inferenz (Produktionsphase)"
+                            data-es="🚀 Inferencia (fase de producción)"
+                            data-pt="🚀 Inferência (fase de produção)">
+                            🚀 Inference (Production Phase)
+                        </h4>
+                        <ul>
+                            <li
+                                data-en="Use the trained model to answer new questions (match day)"
+                                data-de="Verwendet das trainierte Modell, um neue Fragen zu beantworten (Spieltag)"
+                                data-es="Usa el modelo entrenado para responder preguntas nuevas (día de partido)"
+                                data-pt="Usa o modelo treinado para responder a novas perguntas (dia de jogo)">
+                                Use the trained model to answer new questions (match day)
+                            </li>
+                            <li
+                                data-en="Only forward pass is needed (no gradients)"
+                                data-de="Nur Vorwärtsdurchlauf nötig (keine Gradienten)"
+                                data-es="Solo se necesita el paso hacia adelante (sin gradientes)"
+                                data-pt="Só é preciso o forward pass (sem gradientes)">
+                                Only forward pass is needed (no gradients)
+                            </li>
+                            <li
+                                data-en="Can run on servers, desktops or on-device accelerators"
+                                data-de="Kann auf Servern, Desktops oder On-Device-Beschleunigern laufen"
+                                data-es="Puede ejecutarse en servidores, ordenadores o aceleradores en el dispositivo"
+                                data-pt="Pode rodar em servidores, desktops ou aceleradores no dispositivo">
+                                Can run on servers, desktops or on-device accelerators
+                            </li>
+                            <li
+                                data-en="Often needs low latency and predictable performance"
+                                data-de="Benötigt oft geringe Latenz und vorhersehbare Performance"
+                                data-es="A menudo necesita baja latencia y rendimiento predecible"
+                                data-pt="Frequentemente precisa de baixa latência e desempenho previsível">
+                                Often needs low latency and predictable performance
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-box-title"
+                             data-en="🧱 Typical Hardware Choices"
+                             data-de="🧱 Typische Hardware-Wahl"
+                             data-es="🧱 Elecciones típicas de hardware"
+                             data-pt="🧱 Escolhas típicas de hardware">
+                            🧱 Typical Hardware Choices
+                        </div>
+                        <ul>
+                            <li
+                                data-en="Training: Usually big GPUs or TPUs in the cloud (whole team plus analytics staff)."
+                                data-de="Training: Meist große GPUs oder TPUs in der Cloud (gesamtes Team plus Analystenstab)."
+                                data-es="Entrenamiento: Normalmente grandes GPUs o TPUs en la nube (todo el equipo más el staff de analistas)."
+                                data-pt="Treino: Normalmente GPUs ou TPUs grandes na nuvem (time inteiro mais equipe de analistas).">
+                                Training: Usually big GPUs or TPUs in the cloud (whole team plus analytics staff).
+                            </li>
+                            <li
+                                data-en="Inference: Mix of GPUs, CPUs and edge accelerators — depending on latency, cost and power limits."
+                                data-de="Inferenz: Mix aus GPUs, CPUs und Edge-Beschleunigern – je nach Latenz-, Kosten- und Leistungsgrenzen."
+                                data-es="Inferencia: Mezcla de GPUs, CPUs y aceleradores en el edge, según latencia, coste y límites de potencia."
+                                data-pt="Inferência: Mistura de GPUs, CPUs e aceleradores de borda — depende de latência, custo e limites de energia.">
+                                Inference: Mix of GPUs, CPUs and edge accelerators — depending on latency, cost and power limits.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="quiz-section">
+                        <div class="quiz-title"
+                             data-en="Quick Check: Where would you train vs. deploy?"
+                             data-de="Kurz-Check: Wo trainierst du, wo setzt du ein?"
+                             data-es="Chequeo rápido: ¿Dónde entrenas y dónde despliegas?"
+                             data-pt="Checagem rápida: Onde treinar e onde implantar?">
+                            Quick Check: Where would you train vs. deploy?
+                        </div>
+                        <p style="margin:6px 0 8px;"
+                           data-en="Imagine your model – think: is it more like long weeks of practice, or fast reactions during the match?"
+                           data-de="Stell dir dein Modell vor – ist es näher an langen Trainingswochen oder an schnellen Reaktionen im Spiel?"
+                           data-es="Imagina tu modelo: ¿se parece más a semanas de entrenamiento o a reacciones rápidas durante el partido?"
+                           data-pt="Imagine seu modelo – ele se parece mais com semanas de treino ou com reações rápidas durante o jogo?">
+                            Imagine your model – think: is it more like long weeks of practice, or fast reactions during the match?
+                        </p>
+                        <label for="hwSelect"
+                               data-en="What are you mostly optimising for?"
+                               data-de="Worauf optimierst du hauptsächlich?"
+                               data-es="¿Qué es lo que más estás optimizando?"
+                               data-pt="O que você está otimizando mais?">
+                            What are you mostly optimising for?
+                        </label>
+                        <select id="hwSelect">
+                            <option value="training"
+                                    data-en="Heavy training runs (weeks of practice)"
+                                    data-de="Schwere Trainingsläufe (Wochen voller Übung)"
+                                    data-es="Entrenamientos pesados (semanas de práctica)"
+                                    data-pt="Treinos pesados (semanas de prática)">
+                                Heavy training runs (weeks of practice)
+                            </option>
+                            <option value="lowLatency"
+                                    data-en="Ultra-low-latency reactions (goalkeeper reflexes)"
+                                    data-de="Ultra-geringe Latenz (Torwartreflexe)"
+                                    data-es="Reacciones de ultra baja latencia (reflejos de portero)"
+                                    data-pt="Reações de ultra baixa latência (reflexos de goleiro)">
+                                Ultra-low-latency reactions (goalkeeper reflexes)
+                            </option>
+                            <option value="cost"
+                                    data-en="Cheaper serving at scale (whole season on a budget)"
+                                    data-de="Günstiger Betrieb im großen Stil (ganze Saison mit Budget)"
+                                    data-es="Servicio barato a gran escala (toda la temporada con presupuesto)"
+                                    data-pt="Atender em escala com baixo custo (temporada inteira no orçamento)">
+                                Cheaper serving at scale (whole season on a budget)
+                            </option>
+                            <option value="mix"
+                                    data-en="A mix: some training, some fast inference"
+                                    data-de="Ein Mix: etwas Training, etwas schnelle Inferenz"
+                                    data-es="Una mezcla: algo de entrenamiento, algo de inferencia rápida"
+                                    data-pt="Um misto: um pouco de treino, um pouco de inferência rápida">
+                                A mix: some training, some fast inference
+                            </option>
+                        </select>
+                        <p id="quizAnswer" style="margin-top:8px; font-size:0.86rem; color:#92400e;"
+                           data-en="Hint: Big training jobs love GPUs/TPUs in the cloud. Ultra-fast reflexes often live on-device."
+                           data-de="Hinweis: Große Trainingsjobs lieben GPUs/TPUs in der Cloud. Ultra-schnelle Reflexe leben oft direkt auf dem Gerät."
+                           data-es="Pista: Los grandes trabajos de entrenamiento adoran las GPUs/TPUs en la nube. Los reflejos ultrarrápidos suelen vivir en el dispositivo."
+                           data-pt="Dica: Grandes trabalhos de treino adoram GPUs/TPUs na nuvem. Reflexos ultra rápidos muitas vezes vivem no próprio dispositivo.">
+                            Hint: Big training jobs love GPUs/TPUs in the cloud. Ultra-fast reflexes often live on-device.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 8: Efficiency & Energy -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">8</div>
+                    <div class="step-title"
+                         data-en="Efficiency, Cost &amp; A Tiny Energy Calculator ♻️"
+                         data-de="Effizienz, Kosten &amp; ein kleiner Energiekalkulator ♻️"
+                         data-es="Eficiencia, coste y una mini calculadora de energía ♻️"
+                         data-pt="Eficiência, custo &amp; uma mini calculadora de energia ♻️">
+                        Efficiency, Cost &amp; A Tiny Energy Calculator ♻️
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="visual-icon">♻️ ➔ 📉</div>
+                    <p class="step-description"
+                       data-en="Fast models are great — but you also pay in energy, money and cooling. In real projects, “how much does this cost per prediction?” is just as important as raw speed."
+                       data-de="Schnelle Modelle sind großartig – aber du zahlst mit Energie, Geld und Kühlung. In echten Projekten ist „Was kostet mich jede Vorhersage?“ genauso wichtig wie reine Geschwindigkeit."
+                       data-es="Los modelos rápidos son geniales, pero también pagas en energía, dinero y refrigeración. En proyectos reales, “¿cuánto cuesta cada predicción?” importa tanto como la velocidad bruta."
+                       data-pt="Modelos rápidos são ótimos – mas você paga em energia, dinheiro e refrigeração. Em projetos reais, “quanto custa cada previsão?” importa tanto quanto a velocidade bruta.">
+                        Fast models are great — but you also pay in energy, money and cooling.
+                        In real projects, “how much does this cost per prediction?” is just as important as raw speed.
+                    </p>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4
+                                data-en="💰 Why Efficiency Matters"
+                                data-de="💰 Warum Effizienz wichtig ist"
+                                data-es="💰 Por qué importa la eficiencia"
+                                data-pt="💰 Por que a eficiência importa">
+                                💰 Why Efficiency Matters
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="Lower energy use → lower cloud bill and greener footprint"
+                                    data-de="Weniger Energieverbrauch → niedrigere Cloud-Rechnung und grünerer Fußabdruck"
+                                    data-es="Menor consumo de energía → menor factura en la nube y huella más verde"
+                                    data-pt="Menor uso de energia → conta de nuvem menor e pegada mais verde">
+                                    Lower energy use → lower cloud bill and greener footprint
+                                </li>
+                                <li
+                                    data-en="Efficient hardware can serve more users with the same budget"
+                                    data-de="Effiziente Hardware kann mit dem gleichen Budget mehr Nutzer bedienen"
+                                    data-es="Un hardware eficiente puede servir a más usuarios con el mismo presupuesto"
+                                    data-pt="Hardware eficiente atende mais usuários com o mesmo orçamento">
+                                    Efficient hardware can serve more users with the same budget
+                                </li>
+                                <li
+                                    data-en="Mobile/robot systems have strict power limits (battery!)"
+                                    data-de="Mobile/Robotersysteme haben strenge Leistungsgrenzen (Akku!)"
+                                    data-es="Los sistemas móviles/robots tienen límites de potencia estrictos (¡batería!)"
+                                    data-pt="Sistemas móveis/robôs têm limites rígidos de energia (bateria!)">
+                                    Mobile/robot systems have strict power limits (battery!)
+                                </li>
+                                <li
+                                    data-en="Cooling, noise and data-center design all depend on power"
+                                    data-de="Kühlung, Lärm und Rechenzentrumsdesign hängen alle von der Leistung ab"
+                                    data-es="La refrigeración, el ruido y el diseño del centro de datos dependen de la potencia"
+                                    data-pt="Refrigeração, ruído e design do data center dependem todos da potência">
+                                    Cooling, noise and data-center design all depend on power
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4
+                                data-en="📊 Typical Power Draw (very approximate)"
+                                data-de="📊 Typische Leistungsaufnahme (sehr grob)"
+                                data-es="📊 Consumo típico de potencia (muy aproximado)"
+                                data-pt="📊 Consumo típico de energia (bem aproximado)">
+                                📊 Typical Power Draw (very approximate)
+                            </h4>
+                            <ul>
+                                <li
+                                    data-en="CPU desktop: ~65–125 W under heavy load"
+                                    data-de="Desktop-CPU: ~65–125 W unter hoher Last"
+                                    data-es="CPU de escritorio: ~65–125 W bajo carga"
+                                    data-pt="CPU de desktop: ~65–125 W em carga pesada">
+                                    CPU desktop: ~65–125 W under heavy load
+                                </li>
+                                <li
+                                    data-en="High-end GPU: ~250–400+ W"
+                                    data-de="High-End-GPU: ~250–400+ W"
+                                    data-es="GPU de gama alta: ~250–400+ W"
+                                    data-pt="GPU topo de linha: ~250–400+ W">
+                                    High-end GPU: ~250–400+ W
+                                </li>
+                                <li
+                                    data-en="Server TPU board: similar ballpark, but tuned for tensor math"
+                                    data-de="Server-TPU-Board: ähnliche Größenordnung, aber auf Tensor-Mathematik optimiert"
+                                    data-es="Placa TPU de servidor: rango similar, pero ajustada para matemática tensorial"
+                                    data-pt="Placa TPU de servidor: faixa semelhante, mas ajustada para matemática de tensores">
+                                    Server TPU board: similar ballpark, but tuned for tensor math
+                                </li>
+                                <li
+                                    data-en="Edge accelerators (phones, small boards) aim for a few watts"
+                                    data-de="Edge-Beschleuniger (Handys, kleine Boards) zielen auf wenige Watt ab"
+                                    data-es="Los aceleradores en el edge (móviles, placas pequeñas) apuntan a unos pocos vatios"
+                                    data-pt="Aceleradores de borda (celulares, placas pequenas) visam a poucos watts">
+                                    Edge accelerators (phones, small boards) aim for a few watts
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="simulation-container" style="margin-top: 12px;">
+                        <div class="simulation-title"
+                             data-en="Mini Energy Calculator (Toy Numbers)"
+                             data-de="Mini-Energiekalkulator (Spielzahlen)"
+                             data-es="Mini calculadora de energía (números de ejemplo)"
+                             data-pt="Mini calculadora de energia (números fictícios)">
+                            Mini Energy Calculator (Toy Numbers)
+                        </div>
+                        <p style="text-align:center; font-size:0.86rem; color:var(--ink-1); margin-bottom:8px;"
+                           data-en="Pick hardware and number of “plays” (batches). We’ll compare relative time and energy units — just to build intuition."
+                           data-de="Wähle Hardware und Anzahl der „Spielzüge“ (Batches). Wir vergleichen relative Zeit- und Energieeinheiten – nur für ein Gefühl."
+                           data-es="Elige hardware y número de “jugadas” (lotes). Compararemos unidades relativas de tiempo y energía, solo para construir intuición."
+                           data-pt="Escolha o hardware e o número de “jogadas” (lotes). Vamos comparar unidades relativas de tempo e energia – só para criar intuição.">
+                            Pick hardware and number of “plays” (batches). We’ll compare relative time and energy units — just to build intuition.
+                        </p>
+
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; justify-content:center; margin-bottom:8px;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <label for="energyHardware"
+                                       data-en="Hardware"
+                                       data-de="Hardware"
+                                       data-es="Hardware"
+                                       data-pt="Hardware">
+                                    Hardware
+                                </label>
+                                <select id="energyHardware" style="min-width:140px; padding:6px 8px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem;">
+                                    <option value="cpu"
+                                            data-en="CPU (playmaker)"
+                                            data-de="CPU (Spielmacher)"
+                                            data-es="CPU (creador de juego)"
+                                            data-pt="CPU (camisa 10)">
+                                        CPU (playmaker)
+                                    </option>
+                                    <option value="gpu"
+                                            data-en="GPU (whole team)"
+                                            data-de="GPU (gesamtes Team)"
+                                            data-es="GPU (equipo completo)"
+                                            data-pt="GPU (time inteiro)">
+                                        GPU (whole team)
+                                    </option>
+                                    <option value="tpu"
+                                            data-en="TPU (tiki-taka grid)"
+                                            data-de="TPU (Tiki-Taka-Gitter)"
+                                            data-es="TPU (cuadrícula tiki-taka)"
+                                            data-pt="TPU (grelha tiki-taka)">
+                                        TPU (tiki-taka grid)
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <label for="energyPlays"
+                                       data-en="Number of plays"
+                                       data-de="Anzahl der Spielzüge"
+                                       data-es="Número de jugadas"
+                                       data-pt="Número de jogadas">
+                                    Number of plays
+                                </label>
+                                <input id="energyPlays" type="number" min="10" max="100000" value="1000"
+                                       style="width:120px; padding:6px 8px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem;">
+                            </div>
+
+                            <button class="control-btn" type="button" onclick="computeEnergy()"
+                                data-en="📉 Calculate"
+                                data-de="📉 Berechnen"
+                                data-es="📉 Calcular"
+                                data-pt="📉 Calcular">
+                                📉 Calculate
+                            </button>
+                        </div>
+
+                        <div id="energyResult"
+                             style="font-size:0.86rem; text-align:center; margin-bottom:8px; color:var(--ink-1);"
+                             data-en="Set your hardware and plays, then press “Calculate”."
+                             data-de="Wähle Hardware und Spielzüge, dann auf „Berechnen“ klicken."
+                             data-es="Elige hardware y jugadas, luego pulsa “Calcular”."
+                             data-pt="Escolha hardware e jogadas, depois clique em “Calcular”.">
+                            Set your hardware and plays, then press “Calculate”.
+                        </div>
+
+                        <div style="margin-top: 4px; padding: 8px; background: #eff6ff; border-radius: 8px; font-size: 0.86rem; border-left: 4px solid #2563eb; color:var(--ink-1);">
+                            <strong
+                                data-en="Insight:"
+                                data-de="Hinweis:"
+                                data-es="Idea clave:"
+                                data-pt="Insight:">
+                                Insight:
+                            </strong>
+                            <span id="insightText"
+                                  data-en="GPUs and TPUs do more work per unit of energy on big batches. CPUs shine for control logic and smaller jobs."
+                                  data-de="GPUs und TPUs erledigen bei großen Batches mehr Arbeit pro Energieeinheit. CPUs glänzen bei Kontrolllogik und kleineren Jobs."
+                                  data-es="Las GPUs y TPUs hacen más trabajo por unidad de energía en lotes grandes. Las CPUs brillan en lógica de control y trabajos pequeños."
+                                  data-pt="GPUs e TPUs fazem mais trabalho por unidade de energia em lotes grandes. CPUs brilham na lógica de controle e em tarefas menores.">
+                                GPUs and TPUs do more work per unit of energy on big batches. CPUs shine for control logic and smaller jobs.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="footer-note"
+           data-en="“Good AI is like a good football team: the magic happens when every role is used in the right place.”"
+           data-de="„Gute KI ist wie eine gute Fußballmannschaft: Die Magie entsteht, wenn jede Rolle am richtigen Platz eingesetzt wird.“"
+           data-es="“Una buena IA es como un buen equipo de fútbol: la magia sucede cuando cada rol se usa en el lugar correcto.”"
+           data-pt="“Boa IA é como um bom time de futebol: a magia acontece quando cada função é usada no lugar certo.”">
+            “Good AI is like a good football team: the magic happens when every role is used in the right place.”
+        </p>
+    </div>
+
+    <script>
+        // ========== GLOBAL STATE ==========
+        let currentLang = 'en';
+        let lastEnergyCalc = null;
+        let raceTimeouts = [];
+
+        const RACE_STATUS_TEXT = {
+            en: { ready: "Ready", racing: "Racing...", done: "Finished!" },
+            de: { ready: "Bereit", racing: "Im Rennen...", done: "Fertig!" },
+            es: { ready: "Listo", racing: "En carrera...", done: "Terminado!" },
+            pt: { ready: "Pronto", racing: "Correndo...", done: "Concluído!" }
+        };
+
+        const CAPTION_TEXT = {
+            cpu: {
+                en: 'CPU: “Okay, strikers – one at a time to the edge of the box!”',
+                de: 'CPU: „Okay, Stürmer – einer nach dem anderen an die Strafraumkante!“',
+                es: 'CPU: “Vale, delanteros: uno por uno hasta la frontal del área.”',
+                pt: 'CPU: “Certo, atacantes – um de cada vez na entrada da área!”'
+            },
+            gpu: {
+                en: 'GPU: “Everyone grab a ball – we finish as a unit!”',
+                de: 'GPU: „Alle schnappen sich einen Ball – wir schließen als Einheit ab!“',
+                es: 'GPU: “¡Todos cojan un balón, definimos como equipo!”',
+                pt: 'GPU: “Todo mundo com uma bola – vamos finalizar em equipe!”'
+            }
+        };
+
+        const ENERGY_DEFAULT_TEXT = {
+            en: 'Set your hardware and plays, then press “Calculate”.',
+            de: 'Wähle Hardware und Spielzüge, dann auf „Berechnen“ klicken.',
+            es: 'Elige hardware y jugadas, luego pulsa “Calcular”.',
+            pt: 'Escolha hardware e jogadas, depois clique em “Calcular”.'
+        };
+
+        const ENERGY_RESULT_TEXT = {
+            en: (hw, plays, time, energy) =>
+                `For ${plays} plays on a ${hw}, time ≈ ${time.toFixed(1)} and energy ≈ ${energy.toFixed(1)} (relative units).`,
+            de: (hw, plays, time, energy) =>
+                `Für ${plays} Spielzüge auf einer ${hw} liegen Zeit ≈ ${time.toFixed(1)} und Energie ≈ ${energy.toFixed(1)} (relative Einheiten).`,
+            es: (hw, plays, time, energy) =>
+                `Para ${plays} jugadas en una ${hw}, tiempo ≈ ${time.toFixed(1)} y energía ≈ ${energy.toFixed(1)} (unidades relativas).`,
+            pt: (hw, plays, time, energy) =>
+                `Para ${plays} jogadas em uma ${hw}, tempo ≈ ${time.toFixed(1)} e energia ≈ ${energy.toFixed(1)} (unidades relativas).`
+        };
+
+        const ENERGY_HW_LABEL = {
+            cpu: { en: "CPU", de: "CPU", es: "CPU", pt: "CPU" },
+            gpu: { en: "GPU", de: "GPU", es: "GPU", pt: "GPU" },
+            tpu: { en: "TPU", de: "TPU", es: "TPU", pt: "TPU" }
+        };
+
+        const ENERGY_MODEL = {
+            cpu: { speed: 1, energyPerPlay: 1.0 },
+            gpu: { speed: 4, energyPerPlay: 0.7 },
+            tpu: { speed: 5, energyPerPlay: 0.55 }
+        };
+
+        // ========== LANGUAGE SWITCHING ==========
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+
+            const attrName = 'data-' + lang;
+
+            // Update all elements with data-en (they also carry other data-*)
+            document.querySelectorAll('[data-en]').forEach(el => {
+                const text = el.getAttribute(attrName);
+                if (text !== null) {
+                    el.textContent = text;
+                }
+            });
+
+            // Update race statuses
+            updateRaceStatusLanguage();
+
+            // Update captions for CPU/GPU simulations
+            const cpuCap = document.getElementById('cpuCaption');
+            if (cpuCap && CAPTION_TEXT.cpu[lang]) {
+                cpuCap.textContent = CAPTION_TEXT.cpu[lang];
+            }
+            const gpuCap = document.getElementById('gpuCaption');
+            if (gpuCap && CAPTION_TEXT.gpu[lang]) {
+                gpuCap.textContent = CAPTION_TEXT.gpu[lang];
+            }
+
+            // Update energy result text
+            updateEnergyResultLanguage();
+        }
+
+        function updateRaceStatusLanguage() {
+            const status = RACE_STATUS_TEXT[currentLang];
+
+            const cpuStatus = document.getElementById('cpuRaceStatus');
+            const gpuStatus = document.getElementById('gpuRaceStatus');
+            const tpuStatus = document.getElementById('tpuRaceStatus');
+
+            if (cpuStatus && !cpuStatus.dataset.state) cpuStatus.dataset.state = 'ready';
+            if (gpuStatus && !gpuStatus.dataset.state) gpuStatus.dataset.state = 'ready';
+            if (tpuStatus && !tpuStatus.dataset.state) tpuStatus.dataset.state = 'ready';
+
+            if (cpuStatus) cpuStatus.textContent = status[cpuStatus.dataset.state || 'ready'];
+            if (gpuStatus) gpuStatus.textContent = status[gpuStatus.dataset.state || 'ready'];
+            if (tpuStatus) tpuStatus.textContent = status[tpuStatus.dataset.state || 'ready'];
+        }
+
+        function updateEnergyResultLanguage() {
+            const el = document.getElementById('energyResult');
+            if (!el) return;
+
+            if (lastEnergyCalc) {
+                const { hw, plays, time, energy } = lastEnergyCalc;
+                const label = ENERGY_HW_LABEL[hw][currentLang] || hw.toUpperCase();
+                el.textContent = ENERGY_RESULT_TEXT[currentLang](label, plays, time, energy);
+            } else {
+                el.textContent = ENERGY_DEFAULT_TEXT[currentLang];
+            }
+        }
+
+        // ========== STEPS / ACCORDION + PROGRESS ==========
+        function setupSteps() {
+            const steps = Array.from(document.querySelectorAll('.step'));
+            const progressFill = document.getElementById('progressFill');
+
+            function setActiveStep(index) {
+                steps.forEach((step, i) => {
+                    step.classList.toggle('active', i === index);
+                });
+                if (progressFill) {
+                    const pct = ((index + 1) / steps.length) * 100;
+                    progressFill.style.width = pct + '%';
+                }
+            }
+
+            steps.forEach((step, index) => {
+                step.addEventListener('click', (e) => {
+                    if (e.target.closest('button') || e.target.closest('select') || e.target.tagName === 'OPTION') {
+                        return; // don't toggle when clicking controls
+                    }
+                    setActiveStep(index);
+                });
+            });
+
+            if (steps.length) setActiveStep(0);
+        }
+
+        // ========== FLOATING FOOTBALLS ==========
+        function spawnFootballs() {
+            const sky = document.getElementById('footballSky');
+            if (!sky) return;
+            const emojis = ['⚽', '🥅', '🏟️'];
+            const count = 10;
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'football-float';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.top = Math.random() * 100 + 'vh';
+                el.style.setProperty('--duration', (12 + Math.random() * 10) + 's');
+                el.style.animationDelay = (-Math.random() * 20) + 's';
+                sky.appendChild(el);
+            }
+        }
+
+        // ========== CPU / GPU SIMULATIONS ==========
+        function runCpuSim(event, btn) {
+            event.stopPropagation();
+            const canvas = document.getElementById('cpuCanvas');
+            if (!canvas || btn.disabled) return;
+            btn.disabled = true;
+
+            canvas.innerHTML = '';
+            const players = 8;
+
+            const nodes = [];
+            for (let i = 0; i < players; i++) {
+                const div = document.createElement('div');
+                div.className = 'cpu-customer';
+                div.textContent = '🙂';
+                canvas.appendChild(div);
+                nodes.push(div);
+            }
+
+            let idx = 0;
+            function processNext() {
+                if (idx >= nodes.length) {
+                    btn.disabled = false;
+                    return;
+                }
+                const node = nodes[idx];
+                node.classList.add('processing');
+                setTimeout(() => {
+                    node.classList.remove('processing');
+                    node.classList.add('done');
+                    idx++;
+                    setTimeout(processNext, 200);
+                }, 450);
+            }
+            processNext();
+        }
+
+        function runGpuSim(event, btn) {
+            event.stopPropagation();
+            const canvas = document.getElementById('gpuCanvas');
+            if (!canvas || btn.disabled) return;
+            btn.disabled = true;
+
+            canvas.innerHTML = '';
+            const players = 14;
+            const nodes = [];
+            for (let i = 0; i < players; i++) {
+                const div = document.createElement('div');
+                div.className = 'gpu-customer';
+                div.textContent = '🙂';
+                canvas.appendChild(div);
+                nodes.push(div);
+            }
+
+            // All start almost together
+            setTimeout(() => {
+                nodes.forEach((node, i) => {
+                    setTimeout(() => node.classList.add('processing'), i * 40);
+                });
+            }, 80);
+
+            // Then all finish quickly
+            setTimeout(() => {
+                nodes.forEach((node, i) => {
+                    setTimeout(() => {
+                        node.classList.remove('processing');
+                        node.classList.add('done');
+                    }, i * 30);
+                });
+                setTimeout(() => { btn.disabled = false; }, 700);
+            }, 650);
+        }
+
+        // ========== TPU GRID ANIMATION ==========
+        function buildTpuGrid() {
+            const grid = document.getElementById('tpuGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const cells = [];
+            for (let i = 0; i < 16; i++) {
+                const div = document.createElement('div');
+                div.className = 'tpu-dancer';
+                div.textContent = '🔵';
+                grid.appendChild(div);
+                cells.push(div);
+            }
+            return cells;
+        }
+
+        function runTpuDance(event, btn) {
+            event.stopPropagation();
+            const grid = document.getElementById('tpuGrid');
+            if (!grid || btn.disabled) return;
+            btn.disabled = true;
+
+            const cells = grid.children.length ? Array.from(grid.children) : buildTpuGrid();
+            if (!cells || !cells.length) {
+                btn.disabled = false;
+                return;
+            }
+
+            let step = 0;
+            const size = 4;
+            const totalSteps = size * 2 - 1; // diagonals
+
+            const interval = setInterval(() => {
+                // clear
+                cells.forEach(c => c.classList.remove('active'));
+                // activate diagonal
+                for (let row = 0; row < size; row++) {
+                    for (let col = 0; col < size; col++) {
+                        if (row + col === step) {
+                            const idx = row * size + col;
+                            cells[idx].classList.add('active');
+                        }
+                    }
+                }
+                step++;
+                if (step >= totalSteps) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        cells.forEach(c => c.classList.remove('active'));
+                        btn.disabled = false;
+                    }, 300);
+                }
+            }, 220);
+        }
+
+        // ========== HARDWARE RACE ==========
+        function clearRaceTimeouts() {
+            raceTimeouts.forEach(t => clearTimeout(t));
+            raceTimeouts = [];
+        }
+
+        function startHardwareRace() {
+            clearRaceTimeouts();
+
+            const cpuBar = document.querySelector('.cpu-bar');
+            const gpuBar = document.querySelector('.gpu-bar');
+            const tpuBar = document.querySelector('.tpu-bar');
+
+            const cpuStatus = document.getElementById('cpuRaceStatus');
+            const gpuStatus = document.getElementById('gpuRaceStatus');
+            const tpuStatus = document.getElementById('tpuRaceStatus');
+
+            if (!cpuBar || !gpuBar || !tpuBar) return;
+
+            // Reset widths
+            cpuBar.style.width = '0%';
+            gpuBar.style.width = '0%';
+            tpuBar.style.width = '0%';
+
+            // Set racing state
+            if (cpuStatus) cpuStatus.dataset.state = 'racing';
+            if (gpuStatus) gpuStatus.dataset.state = 'racing';
+            if (tpuStatus) tpuStatus.dataset.state = 'racing';
+            updateRaceStatusLanguage();
+
+            // Simple toy timings
+            const cpuTime = 6000;
+            const gpuTime = 3200;
+            const tpuTime = 2200;
+
+            // animate smoothly
+            cpuBar.style.transition = `width ${cpuTime}ms linear`;
+            gpuBar.style.transition = `width ${gpuTime}ms linear`;
+            tpuBar.style.transition = `width ${tpuTime}ms linear`;
+
+            requestAnimationFrame(() => {
+                cpuBar.style.width = '100%';
+                gpuBar.style.width = '100%';
+                tpuBar.style.width = '100%';
+            });
+
+            raceTimeouts.push(setTimeout(() => {
+                if (cpuStatus) {
+                    cpuStatus.dataset.state = 'done';
+                    updateRaceStatusLanguage();
+                }
+            }, cpuTime));
+
+            raceTimeouts.push(setTimeout(() => {
+                if (gpuStatus) {
+                    gpuStatus.dataset.state = 'done';
+                    updateRaceStatusLanguage();
+                }
+            }, gpuTime));
+
+            raceTimeouts.push(setTimeout(() => {
+                if (tpuStatus) {
+                    tpuStatus.dataset.state = 'done';
+                    updateRaceStatusLanguage();
+                }
+            }, tpuTime));
+        }
+
+        function resetHardwareRace() {
+            clearRaceTimeouts();
+            const cpuBar = document.querySelector('.cpu-bar');
+            const gpuBar = document.querySelector('.gpu-bar');
+            const tpuBar = document.querySelector('.tpu-bar');
+
+            if (cpuBar) cpuBar.style.width = '0%';
+            if (gpuBar) gpuBar.style.width = '0%';
+            if (tpuBar) tpuBar.style.width = '0%';
+
+            const cpuStatus = document.getElementById('cpuRaceStatus');
+            const gpuStatus = document.getElementById('gpuRaceStatus');
+            const tpuStatus = document.getElementById('tpuRaceStatus');
+
+            if (cpuStatus) cpuStatus.dataset.state = 'ready';
+            if (gpuStatus) gpuStatus.dataset.state = 'ready';
+            if (tpuStatus) tpuStatus.dataset.state = 'ready';
+
+            updateRaceStatusLanguage();
+        }
+
+        // ========== ENERGY CALCULATOR ==========
+        function computeEnergy() {
+            const hwSel = document.getElementById('energyHardware');
+            const playsInput = document.getElementById('energyPlays');
+            const resultEl = document.getElementById('energyResult');
+            if (!hwSel || !playsInput || !resultEl) return;
+
+            const hw = hwSel.value;
+            const plays = Math.max(10, Math.min(100000, parseInt(playsInput.value, 10) || 0));
+
+            const cfg = ENERGY_MODEL[hw];
+            if (!cfg) return;
+
+            // Toy math: time ~ plays / speed, energy ~ plays * energyPerPlay / 1000
+            const time = plays / (cfg.speed * 100);
+            const energy = plays * cfg.energyPerPlay / 1000;
+
+            lastEnergyCalc = { hw, plays, time, energy };
+
+            const label = ENERGY_HW_LABEL[hw][currentLang] || hw.toUpperCase();
+            resultEl.textContent = ENERGY_RESULT_TEXT[currentLang](label, plays, time, energy);
+        }
+
+        // ========== DOM READY ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup language select
+            const langSelect = document.getElementById('languageSelect');
+            if (langSelect) {
+                langSelect.addEventListener('change', (e) => {
+                    setLanguage(e.target.value);
+                });
+            }
+
+            spawnFootballs();
+            setupSteps();
+
+            // Build initial TPU grid
+            buildTpuGrid();
+
+            // Initialize language
+            setLanguage('en');
+        });
+    </script>
+</body>
+</html>
