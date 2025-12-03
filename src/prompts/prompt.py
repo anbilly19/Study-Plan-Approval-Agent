@@ -34,7 +34,28 @@ main_agent_prompt = ChatPromptTemplate.from_messages(
         ("human", "Given a study plan: \n{study_plan}\n"),
     ]
 )
-
+synth_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are an expert academic advisor. Call the weighted score tool to synthesize final evaluation. "
+        "Extract scheduling_score, alignment_score and workload_score from evaluations and provide an overall recommendation."),
+        (
+            "human",
+            "Based on the following scores and evaluations, provide a final assessment of the study plan:\n{structured_response}\n",
+        ),
+    ]
+)
+synth_prompt_interrupt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are an academic advisor assisstant. Call the weighted score tool to synthesize evaluation. "
+        "Extract scheduling_score, alignment_score and workload_score from evaluations and provide an overall recommendation."
+        " When human feedback is provided, consider it in your assessment."
+        "Call the ask_human tool if the evaluation is YELLOW to get human review."),
+        (
+            "human",
+            "Based on the following scores and evaluations, provide a final assessment of the study plan:\n{structured_response}\n",
+        ),
+    ]
+)
 # input prompts for testing different cases
 green_case = load_prompt(f"{prompt_parent}/green_case.txt")
 yellow_case = load_prompt(f"{prompt_parent}/yellow_structured.txt")
