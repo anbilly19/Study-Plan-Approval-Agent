@@ -1,14 +1,30 @@
-"""Module defining evaluation agents for study plans."""
+"""Module defining evaluation agents for study plans.
+
+This module constructs two sub-agents:
+1. Scheduling Agent   – evaluates scheduling feasibility (conflicts, breaks, exams).
+2. Alignment Agent    – evaluates alignment with major/minor and academic goals.
+
+Both sub-agents:
+- Use database-backed StructuredTools (e.g., querying course descriptions or exam tables).
+- Return SubAgentEvaluation (score + reasoning) via structured output.
+"""
 
 from langchain.agents import create_agent
 from langchain_core.tools import StructuredTool
 from langchain_groq import ChatGroq
-from object_models import SubAgentEvaluation
-from tools import DatabaseTool
+
+from ..object_models import SubAgentEvaluation
+from ..tools import DatabaseTool
 
 
 class EvalAgents:
-    """Class encapsulating evaluation agents for study plans."""
+    """Encapsulates sub-agents responsible for evaluating a study plan.
+
+    Responsibilities:
+        - Build scheduling and alignment evaluation agents.
+        - Provide wrappers for invoking these agents.
+        - Expose them as LangChain tools that the main agent can call.
+    """
 
     def __init__(
         self,
@@ -17,64 +33,83 @@ class EvalAgents:
         alignment_prompt,
         model_name: str,
     ):
+        # Shared LLM used by both sub-agents.
         llm = ChatGroq(model=model_name, temperature=0.0, max_retries=2)
+
+        # Convert the DataFrame-backed CSVs into StructuredTools.
         tool_dict = db_tools.tool_factory()
+
+        # Cache prompts for later use.
         self.scheduling_prompt = scheduling_prompt
         self.alignment_prompt = alignment_prompt
+
+        # Scheduling Agent
+
+        # Uses:
+        #   - exams_tool
+        #   - lectures_tool
+        # to analyze conflicts, exam clustering, and time distribution.
         self.scheduling_agent = create_agent(
-            model=llm, tools=[tool_dict["exams_tool"], tool_dict["lectures_tool"]],
-            response_format=SubAgentEvaluation
-        )  # Add relevant table tools
-        # self.scheduling_agent = {
-        #             "name": "schedule_evaluator",
-        #             "description": "Use the exams_tool and lectures_tool to provide scheduling evaluation for the given study plan.",
-        #             "system_prompt":scheduling_prompt,
-        #             "tools": [tool_dict["exams_tool"], tool_dict["lectures_tool"]],
-        #             "model": "groq:llama-3.3-70b-versatile",
-        #         }
+            model=llm,
+            tools=[
+                tool_dict["exams_tool"],
+                tool_dict["lectures_tool"],
+            ],
+            response_format=SubAgentEvaluation,  # Outputs: score + reasoning
+        )
+
+        # Alignment Agent
+
+        # Uses:
+        #   - course_description_tool
+        #   - course_masterlist_tool
+        # to verify relevance of chosen courses to academic goals.
         self.alignment_agent = create_agent(
             model=llm,
             tools=[
                 tool_dict["course_description_tool"],
                 tool_dict["course_masterlist_tool"],
             ],
-            response_format=SubAgentEvaluation
-        )  
-        # Add relevant table tools
-        # self.alignment_agent = {
-        #             "name": "alignment_evaluator",
-        #             "description": "Use the course_masterlist_tool and course_description_tool to provide alignment evaluation for the given study plan.",
-        #             "system_prompt":alignment_prompt,
-        #             "tools": [tool_dict["course_description_tool"], tool_dict["course_masterlist_tool"]],
-        #             "model": "groq:llama-3.3-70b-versatile",
-        #         }
-        
-        
+            response_format=SubAgentEvaluation,
+        )
+
+    # Direct callable wrappers for each sub-agent
 
     def call_scheduling_agent(self, study_plan: str) -> dict:
+        """Invoke the scheduling agent with its prompt and structured_output."""
         chain = self.scheduling_prompt | self.scheduling_agent
         result = chain.invoke({"study_plan": study_plan})
-        # Ensure the output structure matches StudyPlanEvaluation (score and reasoning)
-        return result
+        return result  # result is a SubAgentEvaluation
 
     def call_alignment_agent(self, study_plan: str) -> dict:
+        """Invoke the alignment agent with its prompt and structured_output."""
         chain = self.alignment_prompt | self.alignment_agent
         result = chain.invoke({"study_plan": study_plan})
-        # Ensure the output structure matches StudyPlanEvaluation (score and reasoning)
-        return result
+        return result  # result is a SubAgentEvaluation
+
+    # Tools exported to the main agent
 
     def get_tools(self):
+        """Return both evaluation agents as LangChain tools the main agent can call.
+
+        Each tool:
+            - Calls the corresponding agent pipeline.
+            - Returns SubAgentEvaluation directly.
+            - Is invoked via tool call, not natural language.
+        """
         return [
             StructuredTool.from_function(
                 name="alignment_evaluator",
                 func=lambda plan: self.call_alignment_agent(plan),
-                description="Evaluates courses alignment with major/minor.",
-                return_direct=True
+                description="Evaluates whether the study plan aligns with the student's goals and"
+                "major/minor requirements.",
+                return_direct=True,  # Return SubAgentEvaluation directly to the main agent
             ),
             StructuredTool.from_function(
                 name="schedule_evaluator",
                 func=lambda plan: self.call_scheduling_agent(plan),
-                description="Assesses study plan schedule for breaks and conflicts.",
-                return_direct=True
+                description="Evaluates whether the study plan avoids conflicts, has reasonable spacing, and"
+                "balances lectures/exams.",
+                return_direct=True,
             ),
         ]
