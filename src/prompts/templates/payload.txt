@@ -1,0 +1,14 @@
+# Red Case Payload
+{
+  "study_plan": "Student name: Anna\\nMajor: Physics\\nMinor: Mathematics\\nCourses selected:\\n\\nPHY-101: Classical Mechanics\\nMTH-110: Calculus I\\nCSC-101: Introduction to Programming\\nCHM-101: General Chemistry I\\nECO-101: Principles of Microeconomics\\nBUS-400: Corporate Strategy and Policy\\nFIN-410: Advanced Corporate Finance\\nMKT-205: Principles of Marketing\\nHRM-200: Human Resource Management\\nIB-400: International Business Strategy\\nSTA-150: Introduction to Statistics"
+}
+
+# Yellow Case Payload
+{
+  "study_plan": "Student Name: Leo\\nMinor: International Business\\nMajor: Economics\\nCourse Selected:\\n\\nECO-101: Principles of Microeconomics\\nECO-220: Intermediate Macroeconomics\\nIB-400: International Business Strategy\\nMKT-300: Consumer Behavior\\nMTH-215: Linear Algebra\\nFIN-210: Corporate Finance\\nMKT-205: Principles of Marketing\\nCHM-101: General Chemistry I\\nBUS-101: Introduction to Business Administration"
+}
+
+# Green Case Payload
+{
+  "study_plan": "Name: Maria\\nMajor: Computer Science\\nMinor: Business Administration\\nCourses Selected:\\n\\nCSC-101: Introduction to Programming\\nCSC-250: Data Structures and Algorithms\\nCSC-310: Database Systems\\nBUS-101: Introduction to Business Administration\\nBUS-310: Operations Management\\nHRM-200: Human Resource Management"
+}

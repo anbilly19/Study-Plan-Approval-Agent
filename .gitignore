@@ -1,0 +1,207 @@
+# --- Byte-compiled / optimized / DLL files ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# --- Distribution / Packaging ---
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+
+# --- Installer logs ---
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Unit test / Coverage reports ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# --- Translations ---
+*.mo
+*.pot
+
+# --- Django / Flask / Web Frameworks ---
+*.log
+local_settings.py
+db.sqlite3
+instance/
+.webassets-cache
+
+# --- Scrapy ---
+.scrapy
+
+# --- Sphinx Documentation ---
+docs/_build/
+
+# --- PyBuilder ---
+target/
+
+# --- Jupyter / IPython ---
+.ipynb_checkpoints/
+*.ipynb~
+profile_default/
+ipython_config.py
+
+# --- PyEnv ---
+.python-version
+
+# --- Celery ---
+celerybeat-schedule
+
+# --- SageMath ---
+*.sage.py
+
+# --- Environments ---
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Spyder / Rope ---
+.spyderproject
+.spyproject
+.ropeproject
+
+# --- MkDocs ---
+/site
+
+# --- Type Checking ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# --- IDE / Editor files ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# --- Docker ---
+Dockerfile~
+docker-compose.override.yml
+.docker/
+docker-data/
+.dockerignore
+*.tar
+
+# --- Node / Frontend (if applicable) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.next/
+out/
+build/
+dist/
+
+# --- LangChain / Agentic System Specific ---
+.langchain/
+.llm_cache/
+.cache/
+*.sqlite3
+vector_store/
+chroma/
+faiss_index/
+weaviate_index/
+milvus_index/
+pinecone_index/
+qdrant_index/
+redis_data/
+rag_storage/
+
+# --- Credentials / Secrets ---
+*.env
+.env.local
+.env.*.local
+secrets.yaml
+config/secrets/
+credentials.json
+api_keys.json
+token.json
+
+# --- Logs ---
+logs/
+*.log
+*.out
+*.err
+nohup.out
+
+# --- Temporary / Data Files ---
+data/dev.db
+datasets/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# --- ML / AI Artifacts ---
+checkpoints/
+models/
+weights/
+artifacts/
+runs/
+wandb/
+mlruns/
+tensorboard/
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.onnx
+
+# --- OS Specific ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Misc ---
+*.lock
+*.log.old
+*.orig
+api_key.txt

@@ -1,0 +1,22 @@
+Student Name: Leo
+Minor: International Business 
+Major: Economics 
+Course Selected:
+
+ECO-101: Principles of Microeconomics
+
+ECO-220: Intermediate Macroeconomics
+
+IB-400: International Business Strategy
+
+MKT-300: Consumer Behavior
+
+MTH-215: Linear Algebra 
+
+FIN-210: Corporate Finance
+
+MKT-205: Principles of Marketing 
+
+CHM-101: General Chemistry I 
+
+BUS-101: Introduction to Business Administration 

@@ -1,0 +1,391 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "\nYou are the study plan supervisor. For the provided study plan, call schedule_evaluator and alignment_evaluator as needed.\nAggregate their results, call weighted_score_tool_with_interrupt, and provide an output containing:\n- scheduling_score, alignment_score, weighted_color\n- scheduling_reasoning, alignment_reasoning\n- overall_recommendation\nAdditionally, evaluate a score based on the amount of courses selected called workload_score and make your evaluation based on that.\nBe critical and thorough in your evaluation, avoid being over optimistic.\n"
+    },
+    {
+      "role": "user",
+      "content": "Given a study plan: \nStudent Name: Leo\nAcademic Program: Economics Major, International Business Minor\nSemester: Fall 2025\n\nECO-101: Principles of Microeconomics\n\nECO-220: Intermediate Macroeconomics\n\nIB-400: International Business Strategy\n\nMTH-215: Linear Algebra (Mathematics Department)\n\nMKT-205: Principles of Marketing (Marketing Department)\n\nCHM-101: General Chemistry I (Chemistry Department)\n\nBUS-101: Introduction to Business Administration (Business Department)\n\n"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "4vp2b840z",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "cfyhk7ast",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "582sd3gd5",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 80,
+              "scheduling_score": 70,
+              "workload_score": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "system",
+      "content": "\nYou are the study plan supervisor. For the provided study plan, call schedule_evaluator and alignment_evaluator as needed.\nAggregate their results, call weighted_score_tool_with_interrupt, and provide an output containing:\n- scheduling_score, alignment_score, weighted_color\n- scheduling_reasoning, alignment_reasoning\n- overall_recommendation\nAdditionally, evaluate a score based on the amount of courses selected called workload_score and make your evaluation based on that.\nBe critical and thorough in your evaluation, avoid being over optimistic.\n"
+    },
+    {
+      "role": "user",
+      "content": "Given a study plan: \nStudent Name: Leo\nAcademic Program: Economics Major, International Business Minor\nSemester: Fall 2025\n\nECO-101: Principles of Microeconomics\n\nECO-220: Intermediate Macroeconomics\n\nIB-400: International Business Strategy\n\nMTH-215: Linear Algebra (Mathematics Department)\n\nMKT-205: Principles of Marketing (Marketing Department)\n\nCHM-101: General Chemistry I (Chemistry Department)\n\nBUS-101: Introduction to Business Administration (Business Department)\n\n"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "en6wa4tgp",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "nhy6b6kzz",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "2hafwfgqq",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 80,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 70,
+              "weighted_color": "yellow",
+              "workload_score": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "system",
+      "content": "\nYou are the study plan supervisor. For the provided study plan, call schedule_evaluator and alignment_evaluator as needed.\nAggregate their results, call weighted_score_tool_with_interrupt, and provide an output containing:\n- scheduling_score, alignment_score, weighted_color\n- scheduling_reasoning, alignment_reasoning\n- overall_recommendation\nAdditionally, evaluate a score based on the amount of courses selected called workload_score and make your evaluation based on that.\nBe critical and thorough in your evaluation, avoid being over optimistic.\n"
+    },
+    {
+      "role": "user",
+      "content": "Given a study plan: \nStudent Name: Leo\nAcademic Program: Economics Major, International Business Minor\nSemester: Fall 2025\n\nECO-101: Principles of Microeconomics\n\nECO-220: Intermediate Macroeconomics\n\nIB-400: International Business Strategy\n\nMTH-215: Linear Algebra (Mathematics Department)\n\nMKT-205: Principles of Marketing (Marketing Department)\n\nCHM-101: General Chemistry I (Chemistry Department)\n\nBUS-101: Introduction to Business Administration (Business Department)\n\n"
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "d7xatfvw1",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "ka8q29ceg",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "5e2mnm8eg",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 80,
+              "scheduling_score": 70,
+              "workload_score": 60
+            }
+          }
+        },
+        {
+          "id": "hv20n84h4",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 80,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 70,
+              "weighted_color": "yellow",
+              "workload_score": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "swr24bg11",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "2cabtm27f",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "cte3dng4k",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 80,
+              "scheduling_score": 70,
+              "workload_score": 60
+            }
+          }
+        },
+        {
+          "id": "mfya8rjqw",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 80,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 70,
+              "weighted_color": "yellow",
+              "workload_score": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "vtkxwge1b",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "3garyxwn3",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "24qd0seeh",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 90,
+              "scheduling_score": 80,
+              "workload_score": 70
+            }
+          }
+        },
+        {
+          "id": "aq2t26z2k",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 90,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 80,
+              "weighted_color": "green",
+              "workload_score": 70
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "57ff1bftb",
+          "function": {
+            "name": "alignment_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "0yw2xntjp",
+          "function": {
+            "name": "schedule_evaluator",
+            "arguments": {
+              "study_plan": "ECO-101: Principles of Microeconomics, ECO-220: Intermediate Macroeconomics, IB-400: International Business Strategy, MTH-215: Linear Algebra, MKT-205: Principles of Marketing, CHM-101: General Chemistry I, BUS-101: Introduction to Business Administration"
+            }
+          }
+        },
+        {
+          "id": "hg96tgsbv",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 90,
+              "scheduling_score": 80,
+              "workload_score": 70
+            }
+          }
+        },
+        {
+          "id": "sj7q9vq48",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 90,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 80,
+              "weighted_color": "green",
+              "workload_score": 70
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "bbaec9h52",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 90,
+              "scheduling_score": 80,
+              "workload_score": 70
+            }
+          }
+        },
+        {
+          "id": "k3922shn1",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 90,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 80,
+              "weighted_color": "green",
+              "workload_score": 70
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "1rxyszj9e",
+          "function": {
+            "name": "weighted_score_tool_with_interrupt",
+            "arguments": {
+              "alignment_score": 90,
+              "scheduling_score": 80,
+              "workload_score": 90
+            }
+          }
+        },
+        {
+          "id": "q1je116yx",
+          "function": {
+            "name": "StudyPlanEvaluation",
+            "arguments": {
+              "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+              "alignment_score": 90,
+              "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+              "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+              "scheduling_score": 80,
+              "weighted_color": "green",
+              "workload_score": 90
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "structured_response": {
+    "scheduling_score": 80,
+    "alignment_score": 90,
+    "weighted_color": "green",
+    "scheduling_reasoning": "The schedule is manageable but has some potential conflicts.",
+    "alignment_reasoning": "The study plan is well-aligned with the Economics Major and International Business Minor, but has some unnecessary courses.",
+    "overall_recommendation": "The student should consider dropping CHM-101 and focusing on core courses.",
+    "workload_score": 90
+  },
+  "__interrupt__": [
+    {
+      "value": {
+        "action_requests": [
+          {
+            "name": "weighted_score_tool_with_interrupt",
+            "args": {
+              "alignment_score": 90,
+              "scheduling_score": 80,
+              "workload_score": 90
+            },
+            "description": "Tool execution requires approval\n\nTool: weighted_score_tool_with_interrupt\nArgs: {'alignment_score': 90, 'scheduling_score': 80, 'workload_score': 90}"
+          }
+        ],
+        "review_configs": [
+          {
+            "action_name": "weighted_score_tool_with_interrupt",
+            "allowed_decisions": ["approve", "edit", "reject"]
+          }
+        ]
+      },
+      "id": "67aa5d00f67c9173998b396a1b08bcb0"
+    }
+  ]
+}
