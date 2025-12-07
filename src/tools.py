@@ -48,15 +48,15 @@ def weighted_score_tool(
 
 
 @tool
-def ask_human_tool() -> None:
+def ask_human_tool(reasoning:str) -> str:
     """Tool to ask human for review in HITL (Human-In-The-Loop) scenarios.
 
     This is a placeholder tool that agents can call to signal that
     human intervention/approval is required. Currently, it performs
-    no logic and simply returns None.
+    no logic and simply returns the reasoning of why the LLM needs a human.
     """
-    pass
-    return None
+    
+    return reasoning
 
 
 @tool
