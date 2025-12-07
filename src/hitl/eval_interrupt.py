@@ -24,8 +24,9 @@ def run_hitl_evaluation(main_agent, study_plan: str, synth) -> dict:
         config={"configurable": {"thread_id": thread_id}},
     )
 
-    print("result", result)
-
+    messages = result.get("messages", [])
+    for msg in messages:
+        msg.pretty_print()
     # Check for interrupt request (this field exists when the agent wants human help).
     if "__interrupt__" in result:
         action = result["__interrupt__"]

@@ -27,7 +27,8 @@ def setup_langsmith_env():
         # Optional project name
         "LANGSMITH_PROJECT": ("hitl_test", False),
         # Other required API keys
-        "GROQ_API_KEY": (None, True),
+        "OPENAI_API_KEY": (None, True),
+        "GROQ_API_KEY": (None, True)
     }
 
     missing_vars = []
@@ -38,7 +39,6 @@ def setup_langsmith_env():
             continue
 
         value = os.getenv(var_name)
-
         # If env var not set
         if not value:
             if default:
