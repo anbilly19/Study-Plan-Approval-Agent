@@ -205,3 +205,8 @@ Desktop.ini
 *.log.old
 *.orig
 api_key.txt
+uadminai/pyvenv.cfg
+uadminai/etc/*
+uadminai/Scripts/*
+uadminai/Include/*
+uadminai/share/jupyter/*

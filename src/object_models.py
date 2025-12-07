@@ -42,7 +42,7 @@ class StudyPlanEvaluation(BaseModel):
 
     This model represents the synthesized result after considering all
     agent evaluations and applying weighting/rules to generate the
-    final recommendation and color-coded status.
+    final recommendation, color-coded status and a detailed reasoning.
     """
 
     # Combined weighted average based on all agent scores.
@@ -54,3 +54,5 @@ class StudyPlanEvaluation(BaseModel):
 
     # Natural-language recommendation summarizing the evaluation.
     overall_recommendation: str = Field(description="Overall recommendation for the study plan.")
+
+    reasoning: str = Field(description="Detailed reasoning behind the final evaluation.")
