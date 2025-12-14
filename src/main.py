@@ -76,10 +76,6 @@ def init_eval_agents(model_name: str = LLAMA_70B, context_parent: Optional[str] 
     Returns:
         A shared EvalAgents instance.
     """
-    global _eval_agents
-    # If already initialized, return the cached instance.
-    if _eval_agents is not None:
-        return _eval_agents
 
     # Build DatabaseTool over CSV-backed context tables.
     df_paths = _context_paths(context_parent)
@@ -111,8 +107,7 @@ def run_evaluation(chain, study_plan: str) -> Any:
 def evaluate_study_plan(
     study_plan: str,
     hitl: bool = False,
-    model_name: str = LLAMA_70B,
-    use_examples: bool = False,
+    model_name: str = LLAMA_70B
 ) -> Any:
     """Unified entrypoint that external callers (e.g., API) can use.
 
@@ -133,9 +128,6 @@ def evaluate_study_plan(
         study_plan: Raw study plan text from the user.
         hitl: Whether to enable Human-In-The-Loop evaluation path.
         model_name: LLM name to use for all agents.
-        use_examples: If True, ignore the provided study_plan and instead:
-            * HITL=True -> use yellow_case example
-            * HITL=False -> use green_case example
 
     Returns:
         The evaluation result structure returned by the chain/HITL runner.
@@ -152,9 +144,7 @@ def evaluate_study_plan(
             interrupt_agent_prompt=interrupt_agent_prompt,
             synth_prompt=synth_prompt_interrupt,
         )
-        # Use example case if requested; otherwise use user-provided plan.
-        plan_text = yellow_case if use_examples else study_plan
-        return run_hitl_evaluation(chain, plan_text, synth)
+        return run_hitl_evaluation(chain, study_plan, synth)
 
     # Non-HITL (fully automated) path:
     chain = create_main_agent(
@@ -163,9 +153,7 @@ def evaluate_study_plan(
         main_agent_prompt=main_agent_prompt,
         synth_prompt=synth_prompt,
     )
-    # Use example or real study plan for evaluation.
-    plan_text = green_case if use_examples else study_plan
-    return run_evaluation(chain, plan_text)
+    return run_evaluation(chain, study_plan)
 
 
 # ------------- CLI behavior preserved -------------
@@ -178,7 +166,7 @@ if __name__ == "__main__":
 
     if hitl:
         # Run HITL evaluation on the green example case.
-        out = evaluate_study_plan(study_plan=green_case, hitl=True)
+        out = evaluate_study_plan(study_plan=yellow_case, hitl=True)
     else:
         # Run automated evaluation on the green example case.
         out = evaluate_study_plan(study_plan=green_case, hitl=False)
