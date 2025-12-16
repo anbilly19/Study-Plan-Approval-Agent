@@ -4,6 +4,15 @@ A modular, agent-driven system powering student study-plan evaluation,
 human-in-the-loop workflows, and advisor dashboards.
 
 
+## Manual approval system
+![Human](./docs/diagrams/Human_approval.png)
+
+## Agentic approval system
+![Agent](./docs/diagrams/Agent_approval.png)
+
+## Complete workflow system
+![complete](./docs/diagrams/approval_complete.png)
+
 ## Running the Project
 
 > **Run all commands from the project root folder:**
