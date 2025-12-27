@@ -1,162 +1,243 @@
-"""Module defining various tools for evaluation and database querying that the agent can use."""
+"""Evaluation tools with class-based structure."""
 
 from functools import partial
 from typing import Any, Dict
-
 import pandas as pd
-from langchain_core.tools import StructuredTool, tool
+from langchain_core.tools import StructuredTool
 
 
-@tool
-def weighted_score_tool(
-    scheduling_score: int,
-    alignment_score: int,
-    workload_score: int,
-) -> Dict[str, Any]:
-    """
-    Calculate weighted average and return structured result.
-
-    Weights: 0.25 sched, 0.25 align, 0.5 workload (pure, no HITL).
-    """
-    # Compute a weighted average of the three scores:
-    # - scheduling_score: weight 0.25
-    # - alignment_score: weight 0.25
-    # - workload_score: weight 0.50 (more important)
-    w_avg = 0.25 * scheduling_score + 0.25 * alignment_score + 0.5 * workload_score
-
-    # Map numeric weighted average into a traffic-light color category.
-    # - 0–45: red (poor)
-    # - 46–75: yellow (needs review)
-    # - 76–100: green (good)
-    if 0 <= w_avg <= 45:
-        color = "red"
-    elif 46 <= w_avg <= 75:
-        color = "yellow"
-    else:
-        color = "green"
-
-    # Return a structured dictionary that can be parsed or wrapped into a model.
-    return {
-        "weighted_avg": round(float(w_avg), 2),
-        "color": color,
-        "scores": {
-            "scheduling_score": scheduling_score,
-            "alignment_score": alignment_score,
-            "workload_score": workload_score,
-        },
-    }
-
-
-@tool
-def ask_human_tool(reasoning:str) -> str:
-    """Tool to ask human for review in HITL (Human-In-The-Loop) scenarios.
-
-    This is a placeholder tool that agents can call to signal that
-    human intervention/approval is required. Currently, it performs
-    no logic and simply returns the reasoning of why the LLM needs a human.
-    """
+class EvaluationTools:
+    """Centralized class for all evaluation tools."""
     
-    return reasoning
-
-
-@tool
-def workload_score_tool(num_courses: int) -> int:
-    """Compute a simple workload score based on the number of courses.
-
-    Heuristics:
-    - <= 6 courses  -> 80 (light workload)
-    - 7–10 courses  -> 60 (moderate workload)
-    - > 10 courses  -> 30 (heavy workload)
-    """
-    if num_courses <= 6:
-        return 80  # light workload
-    elif 7 <= num_courses <= 10:
-        return 60  # moderate workload
-    else:
-        return 30  # heavy workload
-
-
-# ToDo: Replace with direct DB queries instead of CSV-backed dataframes.
-class DatabaseTool:
-    """Base class for database tools.
-
-    Loads CSV files into pandas DataFrames and exposes them as
-    queryable tools for LangChain agents. Each CSV is accessed via
-    a dedicated tool that accepts a pandas query string.
-    """
-
-    def __init__(self, dataframe_path_dict):
+    def __init__(self):
+        """Initialize evaluation tools."""
+        pass
+    
+    @staticmethod
+    def _workload_score_impl(num_courses: int) -> int:
+        """Internal implementation for workload scoring.
+        
+        Scoring criteria:
+        - 6 or fewer courses: 80 points (light workload)
+        - 7 to 10 courses: 60 points (moderate workload)
+        - More than 10 courses: 30 points (heavy workload)
         """
-        Initialize the DatabaseTool with a mapping from logical names to CSV file paths.
-
-        Args:
-            dataframe_path_dict: dict mapping names (e.g. "course_description")
-                                 to CSV file paths.
+        if num_courses <= 6:
+            return 80
+        elif 7 <= num_courses <= 10:
+            return 60
+        else:
+            return 30
+    
+    @staticmethod
+    def _weighted_score_impl(
+        scheduling_score: int,
+        alignment_score: int,
+        workload_score: int
+    ) -> Dict[str, Any]:
+        """Internal implementation for weighted score calculation.
+        
+        Weights: 25% scheduling, 25% alignment, 50% workload.
+        Thresholds: 0-45=red, 46-75=yellow, 76-100=green
         """
-        # df_funcs maps a dataframe name to a callable that runs a query on it.
-        self.df_funcs = {}
-        for name, df_path in dataframe_path_dict.items():
-            # Load CSV into a pandas DataFrame.
-            df = pd.read_csv(df_path)
-            # Create a function that will query this specific DataFrame.
-            df_func = partial(self._query_dataframe, df)
-            # Store it under the given name so it can be turned into a tool later.
-            self.df_funcs[name] = df_func
-
-    def _query_dataframe(self, df: pd.DataFrame, query: str) -> str:
-        """Run a pandas query on a given DataFrame and return the result as a string.
-
-        Args:
-            df: The DataFrame to query.
-            query: A pandas query string (bool expression).
-
+        w_avg = 0.25 * scheduling_score + 0.25 * alignment_score + 0.5 * workload_score
+        
+        if w_avg <= 45:
+            color = "red"
+        elif w_avg <= 75:
+            color = "yellow"
+        else:
+            color = "green"
+        
+        return {
+            "weighted_avg": round(float(w_avg), 2),
+            "color": color,
+            "scores": {
+                "scheduling_score": scheduling_score,
+                "alignment_score": alignment_score,
+                "workload_score": workload_score,
+            }
+        }
+    
+    def create_workload_tool(self) -> StructuredTool:
+        """Create the workload scoring tool.
+        
         Returns:
-            A string representation of the filtered DataFrame,
-            or an error message if the query fails.
+            StructuredTool that computes workload score from course count
+        """
+        return StructuredTool.from_function(
+            name="workload_score_tool",
+            func=self._workload_score_impl,
+            description="""Compute workload score based on number of courses.
+            
+            Scoring criteria:
+            - 6 or fewer courses: 80 points (light workload, well-balanced)
+            - 7 to 10 courses: 60 points (moderate workload, manageable)
+            - More than 10 courses: 30 points (heavy workload, may be overwhelming)
+            
+            Args:
+                num_courses: Total number of courses in the study plan
+            
+            Returns:
+                Workload score from 0-100
+            """,
+        )
+    
+    def create_weighted_score_tool(self) -> StructuredTool:
+        """Create the weighted scoring tool.
+        
+        Returns:
+            StructuredTool that calculates weighted average and color code
+        """
+        return StructuredTool.from_function(
+            name="weighted_score_tool",
+            func=self._weighted_score_impl,
+            description="""Calculate weighted average score and determine color code.
+            
+            Weights: 25% scheduling, 25% alignment, 50% workload.
+            Thresholds: 0-45=red, 46-75=yellow, 76-100=green.
+            
+            Args:
+                scheduling_score: Score from scheduling evaluation (0-100)
+                alignment_score: Score from alignment evaluation (0-100)
+                workload_score: Score from workload evaluation (0-100)
+            
+            Returns:
+                Dictionary with weighted_avg, color, and component scores
+            """,
+        )
+    
+    def get_all_evaluation_tools(self) -> Dict[str, StructuredTool]:
+        """Get all evaluation tools as a dictionary.
+        
+        Returns:
+            Dictionary mapping tool names to StructuredTool objects
+        """
+        return {
+            "workload_score_tool": self.create_workload_tool(),
+            "weighted_score_tool": self.create_weighted_score_tool(),
+        }
+
+
+class DatabaseTool:
+    """CSV-backed database query tools."""
+    
+    def __init__(self, dataframe_path_dict: dict):
+        """Initialize database tools with CSV file paths.
+        
+        Args:
+            dataframe_path_dict: Mapping from logical names to CSV file paths
+        """
+        self.df_funcs = {}
+        self.dataframes = {}
+        
+        for name, df_path in dataframe_path_dict.items():
+            df = pd.read_csv(df_path)
+            self.dataframes[name] = df
+            self.df_funcs[name] = partial(self._query_dataframe, df)
+    
+    def _query_dataframe(self, df: pd.DataFrame, query: str) -> str:
+        """Execute a pandas query on a dataframe.
+        
+        Args:
+            df: DataFrame to query
+            query: Pandas query string
+        
+        Returns:
+            String representation of query results or error message
         """
         try:
-            result = df.query(query).to_string()
-            return result
+            return df.query(query).to_string()
         except Exception as e:
-            # Catch any errors from an invalid query and return a readable message.
             return f"Error executing query: {e}"
-
-    # Convenience wrappers for specific dataframes (assuming they exist in df_funcs).
-
-    def course_description_tool(self, query: str) -> str:
-        """Query the course_description dataframe using a pandas query string."""
-        return self._query_dataframe(df=self.df_funcs["course_description"], query=query)
-
-    def course_masterlist_tool(self, query: str) -> str:
-        """Query the course_masterlist dataframe using a pandas query string."""
-        return self._query_dataframe(df=self.df_funcs["course_masterlist"], query=query)
-
-    def exams_tool(self, query: str) -> str:
-        """Query the exams dataframe using a pandas query string."""
-        return self._query_dataframe(df=self.df_funcs["exams"], query=query)
-
-    def lectures_tool(self, query: str) -> str:
-        """Query the lectures dataframe using a pandas query string."""
-        return self._query_dataframe(df=self.df_funcs["lectures"], query=query)
-
-    def tool_factory(self) -> dict[str, StructuredTool]:
-        """Create LangChain StructuredTool objects for each loaded dataframe.
-
+    
+    def tool_factory(self) -> Dict[str, StructuredTool]:
+        """Create LangChain StructuredTool objects for each dataframe.
+        
         Returns:
-            A dictionary mapping tool names to StructuredTool instances.
-            Each tool:
-            - is named `<df_name>_tool`
-            - accepts a single `query` argument (pandas query string)
-            - returns the stringified query result.
+            Dictionary mapping tool names to StructuredTool objects
         """
-        tool_dict: dict[str, StructuredTool] = {}
+        tool_dict = {}
+        def make_query_func(f):
+            def query_func(query: str) -> str:
+                return f(query)
+            return query_func
         for name, func in self.df_funcs.items():
-            desc = f"Query the {name} dataframe. Accepts a pandas query string."
-            # Use a default argument (f=func) in the lambda to bind the current func
-            # and avoid late binding issues in loops.
+            desc = f"Query the {name} dataframe using pandas query syntax. Returns matching rows."
             tool_dict[f"{name}_tool"] = StructuredTool.from_function(
                 name=f"{name}_tool",
-                func=lambda query, f=func: f(query),
+            func=make_query_func(func),
                 description=desc,
             )
         return tool_dict
+
+
+class ToolRegistry:
+    """Central registry for all tools used in the study plan evaluation system."""
+    
+    def __init__(self, dataframe_path_dict: dict):
+        """Initialize the tool registry.
+        
+        Args:
+            dataframe_path_dict: Mapping from logical names to CSV file paths
+        """
+        self.evaluation_tools = EvaluationTools()
+        self.database_tools = DatabaseTool(dataframe_path_dict)
+    
+    def get_database_tools(self) -> Dict[str, StructuredTool]:
+        """Get all database query tools.
+        
+        Returns:
+            Dictionary of database tools (exams, lectures, courses, etc.)
+        """
+        return self.database_tools.tool_factory()
+    
+    def get_evaluation_tools(self) -> Dict[str, StructuredTool]:
+        """Get all evaluation tools.
+        
+        Returns:
+            Dictionary of evaluation tools (workload, weighted scoring)
+        """
+        return self.evaluation_tools.get_all_evaluation_tools()
+    
+    def get_scheduling_tools(self) -> list[StructuredTool]:
+        """Get tools for scheduling evaluation.
+        
+        Returns:
+            List of tools needed for scheduling node
+        """
+        db_tools = self.get_database_tools()
+        return [
+            db_tools["exams_tool"],
+            db_tools["lectures_tool"],
+        ]
+    
+    def get_alignment_tools(self) -> list[StructuredTool]:
+        """Get tools for alignment evaluation.
+        
+        Returns:
+            List of tools needed for alignment node
+        """
+        db_tools = self.get_database_tools()
+        return [
+            db_tools["course_description_tool"],
+            db_tools["course_masterlist_tool"],
+        ]
+    
+    def get_workload_tools(self) -> list[StructuredTool]:
+        """Get tools for workload evaluation.
+        
+        Returns:
+            List of tools needed for workload node
+        """
+        eval_tools = self.get_evaluation_tools()
+        return [eval_tools["workload_score_tool"]]
+    
+    def get_synthesis_tools(self) -> list[StructuredTool]:
+        """Get tools for synthesis evaluation.
+        
+        Returns:
+            List of tools needed for synthesis node
+        """
+        eval_tools = self.get_evaluation_tools()
+        return [eval_tools["weighted_score_tool"]]

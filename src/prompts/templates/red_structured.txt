@@ -5,22 +5,22 @@ Courses selected:
 
 PHY-101: Classical Mechanics
 
-MTH-110: Calculus I
-
-CSC-101: Introduction to Programming
-
 CHM-101: General Chemistry I
 
-ECO-101: Principles of Microeconomics
-
-BUS-400: Corporate Strategy and Policy
-
-FIN-410: Advanced Corporate Finance
+BUS-101: Introduction to Business Administration
 
 MKT-205: Principles of Marketing
+
+FIN-350: Investment Analysis
 
 HRM-200: Human Resource Management
 
 IB-400: International Business Strategy
 
-STA-150: Introduction to Statistics
+BUS-400: Corporate Strategy and Policy
+
+ACC-202: Managerial Accounting
+
+MKT-310: Marketing Research
+
+CSC-310: Database Systems

@@ -35,21 +35,22 @@ def _format_interrupt_result(result: Dict[str, Any], thread_id: str) -> Dict[str
     first_interrupt = first_interrupt_obj.value
 
     # Extract human-facing description if available.
-    action_requests = first_interrupt.get("action_requests", [])
-    description = "Human review required."
-    action_name = None
-
-    if action_requests:
-        first_action_request = action_requests[0]
-        description = first_action_request.get("description", description)
-        action_name = first_action_request.get("name")
+    eval_summary = first_interrupt.get("evaluation_summary", {})
+    description = f"""Evaluation Summary:
+    Weighted Average: {eval_summary.get('weighted_avg')}
+    Color: {eval_summary.get('color', '').upper()}
+    Scheduling Score: {eval_summary.get('scheduling_score')}/100
+      Reasoning: {eval_summary.get('scheduling_reasoning')}
+    Alignment Score: {eval_summary.get('alignment_score')}/100
+      Reasoning: {eval_summary.get('alignment_reasoning')}
+    Workload Score: {eval_summary.get('workload_score')}/100"""
 
     # Standardized interrupt response for the API.
     return {
         "status": "interrupt",
         "thread_id": thread_id,
         "action": {
-            "name": action_name,
+            "name": "human_review_required",
             "description": description,
             "details": first_interrupt,  # raw data for debugging/frontend logic
         },
@@ -58,7 +59,7 @@ def _format_interrupt_result(result: Dict[str, Any], thread_id: str) -> Dict[str
 
 
 def hitl_start(
-    main_agent,
+    graph,
     study_plan: str,
     thread_id: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -96,7 +97,7 @@ def hitl_start(
     thread_id = thread_id or str(uuid.uuid4())
 
     # Invoke the main agent; LangGraph handles the tool calls and interruptions.
-    result = main_agent.invoke(
+    result = graph.invoke(
         {"study_plan": study_plan},
         config={"configurable": {"thread_id": thread_id}},
     )
@@ -114,7 +115,7 @@ def hitl_start(
 
 
 def hitl_resume(
-    synth_agent,
+    graph,
     thread_id: str,
     decision_type: str,
     edited_scores: Optional[Dict[str, Any]] = None,
@@ -134,7 +135,7 @@ def hitl_resume(
     - "edit": Modify the scoring tool's arguments and re-run evaluation.
 
     Args:
-        synth_agent: The synthesis agent returned by create_interrupt_main_agent().
+        graph: The interrupt-capable LangGraph StateGraph.
         thread_id: The HITL session identifier — ensures we resume the correct graph state.
         decision_type: One of {"approve", "reject", "edit"}.
         edited_scores: Required when decision_type="edit".
@@ -151,51 +152,32 @@ def hitl_resume(
 
     # Build the proper LangGraph Command() depending on human decision.
     if decision_type == "approve":
-        resume_cmd = Command(resume={"decisions": [{"type": "approve"}]})
+        human_response = {
+                "action": "approve"
+            }
 
     elif decision_type == "reject":
-        resume_cmd = Command(
-            resume={
-                "decisions": [
-                    {
-                        "type": "reject",
-                        "message": message or "Study plan requires major revisions.",
-                    }
-                ]
+        human_response = {
+                "action": "reject"
             }
-        )
 
     elif decision_type == "edit":
         if not edited_scores:
             raise ValueError("edited_scores must be provided when decision_type='edit'.")
-
-        resume_cmd = Command(
-            resume={
-                "decisions": [
-                    {
-                        "type": "edit",
-                        "edited_action": {
-                            "name": "weighted_score_tool",
-                            "args": edited_scores,
-                        },
-                    }
-                ]
-            }
-        )
+        
+        human_response = {
+            "action": "edit",
+            "data": edited_scores
+        }
 
     else:
         raise ValueError("decision_type must be one of: approve, reject, edit")
 
     # Resume the LangGraph execution from its previous stopping point.
-    result = synth_agent.invoke(
-        resume_cmd,
+    result = graph.invoke(
+        Command(resume=human_response),
         config={"configurable": {"thread_id": thread_id}},
     )
-
-    # If the resumed computation triggers another human review,
-    # return another structured interrupt state.
-    if "__interrupt__" in result:
-        return _format_interrupt_result(result, thread_id)
 
     # Otherwise, we finally have a complete result.
     return {

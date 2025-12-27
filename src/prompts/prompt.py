@@ -42,10 +42,10 @@ interrupt_agent_prompt_text = load_prompt(f"{prompt_parent}/interrupt_main.txt")
 
 # Scheduling Agent prompt:
 # - Simple single-message prompt where the "human" role provides the full instruction text.
-scheduling_prompt = ChatPromptTemplate.from_messages(("human", scheduling_prompt_text))
+_scheduling_prompt = ChatPromptTemplate.from_messages(("human", scheduling_prompt_text))
 
 # Alignment Agent prompt:
-alignment_prompt = ChatPromptTemplate.from_messages(("human", alignment_prompt_text))
+_alignment_prompt = ChatPromptTemplate.from_messages(("human", alignment_prompt_text))
 
 
 # Interrupt-capable main agent prompt:

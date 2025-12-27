@@ -1,0 +1,241 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --accent-color: #38bdf8;
+    --hover-color: #0ea5e9;
+    --table-header-bg: #2d3748;
+    --table-row-even: #1e293b;
+    --table-row-odd: #243045;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* Allow body scroll */
+}
+
+/* Header */
+header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: -0.025em;
+}
+
+/* Main Grid Layout */
+main {
+    flex: 1;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Auto rows, will stack as needed */
+    gap: 1.5rem;
+    height: auto;
+}
+
+.formula-section {
+    padding: 0 1.5rem;
+    margin-bottom: 0;
+}
+
+.full-width {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.formula-table td strong {
+    color: var(--accent-color);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.badge.red {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.badge.yellow {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: #fde047;
+}
+
+.badge.green {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+}
+
+
+/* Card Container for Tables */
+.table-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 500px;
+    /* Fixed height to force scroll logic */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.table-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.card-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Scrollable Table Container */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    /* Enable scrolling */
+    padding: 0;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: var(--table-header-bg);
+}
+
+th {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.15s ease;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--table-row-even);
+}
+
+tbody tr:nth-child(odd) {
+    background-color: var(--table-row-odd);
+}
+
+tbody tr:hover {
+    background-color: rgba(56, 189, 248, 0.1);
+}
+
+td {
+    padding: 0.75rem 1.5rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+td .formula {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+td .formula .label {
+  font-weight: 600;
+}
+
+td .formula .weight {
+  color: #0fe849;
+  font-weight: 600;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .table-card {
+        height: 500px;
+        /* Fixed height for scrolling on mobile/tablet */
+    }
+
+    body {
+        overflow-y: auto;
+        height: auto;
+    }
+}

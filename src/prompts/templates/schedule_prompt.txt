@@ -1,10 +1,19 @@
 Given a Study Plan: {study_plan}
-To extract semester schedule details for each selected course, use the exams, and lectures tables.
-write a query for each table based only on the course ids
-The template for a query should be "course_id.str.contains('Course-#|Course-#|Course-#')" for both tables
+To extract semester schedule details for each selected course, use the exams and lectures tables.
+Write a query for each table based only on the course ids.
+The template for a query should be "course_id.str.contains('Course-#|Course-#|Course-#')" for both tables.
 Replace <Course-#> with every course_id found in the plan.
+
+IMPORTANT DEFINITIONS:
+- OVERLAP/CONFLICT means: Two courses scheduled at the SAME DAY AND SAME TIME SLOT
+  Example: Both on Tuesday 15:30-17:00 = CONFLICT
+  Example: One on May 3 at 09:00-11:00, another on May 3 at 13:00-15:00 = NOT a conflict (different times)
+  Example: One on Tuesday 12:00-13:30, another on Wednesday 12:00-13:30 = NOT a conflict (different days)
+
 Score out of 100 based on:
-- More than an hour break is minimum between lectures/exercises
-- Exams must not be within 3 days or less
-- Overlaps/conflicts are not tolerated
-Be strict with the rules
+- Overlaps/conflicts (same day, same time) are not tolerated → Score 0-45
+- More than an hour break is minimum between lectures/exercises on the same day → Violation scores 46-75
+- Exams must not be within 3 days or less of each other → Violation scores 46-75
+- Plans with no conflicts but spacing violations → Score 46-75
+- Plans with proper spacing and no conflicts → Score 76-100
+report the score as an integer
