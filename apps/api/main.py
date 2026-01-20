@@ -1,15 +1,13 @@
-import json
-
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from langgraph.graph import StateGraph
 from pydantic import BaseModel
 
-from src.agents.main_agent import create_interrupt_main_agent
 from src.db.queries import fetch_cases, fetch_courses, save_approval_to_db, update_case_status
 from src.env_setup import setup_langsmith_env
 from src.hitl.eval_interrupt_api import hitl_resume, hitl_start
-from src.main import LLAMA_70B, init_eval_agents
-from src.prompts.prompt import interrupt_agent_prompt, synth_prompt_interrupt
+from src.main import LLAMA_70B, init_graph
+from src.prompts.prompt import _alignment_prompt, _scheduling_prompt
 
 # HITL-related imports
 
@@ -65,49 +63,11 @@ class HitlDecision(BaseModel):
 
 # Globals for HITL agent initialization
 
-_interrupt_chain = None  # The main interrupt-capable chain (schedule/alignment/workload)
-_synth_agent = None  # The synthesizer agent used after HITL decisions
-_langsmith_setup_done = False
 _default_model = LLAMA_70B
-
-
-def _ensure_hitl_initialized(model_name: str | None = None):
-    """
-    Lazy initialization strategy for HITL agents.
-
-    - Ensures LangSmith env vars are set once.
-    - Ensures EvalAgents + interrupt-capable chain are built once.
-    - Stores agents globally so FastAPI doesn't reconstruct them on every request.
-
-    Returns:
-        (interrupt_chain, synth_agent)
-    """
-    global _interrupt_chain, _synth_agent, _langsmith_setup_done
-
-    # Use default model unless overridden explicitly
-    if model_name is None:
-        model_name = _default_model
-
-    # Initialize tracing/logging environment if not done already
-    if not _langsmith_setup_done:
-        setup_langsmith_env()
-        _langsmith_setup_done = True
-
-    # Build agents only once
-    if _interrupt_chain is None or _synth_agent is None:
-        eval_agents = init_eval_agents(model_name=model_name)
-
-        # create_interrupt_main_agent returns:
-        #   - interrupt-capable chain (with scheduling, alignment, workload tools)
-        #   - synthesizer agent (with HITL middleware)
-        _interrupt_chain, _synth_agent = create_interrupt_main_agent(
-            eval_agents=eval_agents,
-            model_name=model_name,
-            interrupt_agent_prompt=interrupt_agent_prompt,
-            synth_prompt=synth_prompt_interrupt,
-        )
-
-    return _interrupt_chain, _synth_agent
+_graph: StateGraph = init_graph(
+    model_name=_default_model, scheduling_prompt=_scheduling_prompt, alignment_prompt=_alignment_prompt
+)
+setup_langsmith_env()
 
 
 # Health & utility endpoints
@@ -131,22 +91,17 @@ async def approval_endpoint(request: Request):
     """
     try:
         data = await request.json()
-        print("Approval payload:")
-        print(json.dumps(data, indent=4))
-
-        inserted_rows = save_approval_to_db(data)
-        print(inserted_rows, "rows inserted/updated in the database")
+        save_approval_to_db(data)
 
         return {"message": "Approval data received", "received_items": len(data.get("courses", []))}
     except Exception as e:
         print("Error while reading JSON:", e)
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/courses")
 def get_courses():
     """Endpoint used to return list of courses (used by frontend drop-downs/forms)."""
-    print("Courses endpoint called")
     courses_data = fetch_courses()
     return {"courses": courses_data}
 
@@ -154,7 +109,6 @@ def get_courses():
 @app.get("/admin/cases")
 def get_cases():
     """Endpoint used to return all pending admin cases requiring evaluation."""
-    print("Cases endpoint called")
     return fetch_cases()
 
 
@@ -163,7 +117,7 @@ async def update_case_status_endpoint(case_id: str, payload: StatusUpdate):
     """Endpoint used to allow admin to update case approval status in the database."""
     try:
         # Normalize text to consistent format
-        new_status = payload.status.strip().capitalize()
+        new_status = payload.status.strip()
         notes = payload.notes
 
         updated_rows = update_case_status(case_id, new_status, notes)
@@ -206,18 +160,13 @@ async def start_hitl_evaluation(payload: HitlStartRequest):
             B) status="interrupt" → Human review required (yellow case)
     """
     try:
-        print("HITL start payload:")
-        print(json.dumps(payload.model_dump(), indent=4))
 
         if not payload.study_plan:
             raise HTTPException(status_code=400, detail="Field 'study_plan' is required.")
 
-        # Build/reuse agents
-        interrupt_chain, _ = _ensure_hitl_initialized(model_name=payload.model_name)
-
         # Invoke chain (using eval_interrupt_api logic)
         response = hitl_start(
-            main_agent=interrupt_chain,
+            graph=_graph,
             study_plan=payload.study_plan,
             thread_id=payload.thread_id,
         )
@@ -259,8 +208,6 @@ async def hitl_decision_endpoint(payload: HitlDecision):
       - Another human interrupt is needed (rare but possible).
     """
     try:
-        print("HITL decision payload:")
-        print(payload)
 
         decision = payload.decision.strip().lower()
         if decision not in {"approve", "reject", "edit"}:
@@ -275,12 +222,9 @@ async def hitl_decision_endpoint(payload: HitlDecision):
                 detail="edited_scores must be provided when decision='edit'",
             )
 
-        # Ensure synthesizer agent exists
-        _, synth_agent = _ensure_hitl_initialized()
-
         # Resume HITL flow
         response = hitl_resume(
-            synth_agent=synth_agent,
+            graph=_graph,
             thread_id=payload.thread_id,
             decision_type=decision,
             edited_scores=payload.edited_scores,
@@ -292,5 +236,5 @@ async def hitl_decision_endpoint(payload: HitlDecision):
     except HTTPException:
         raise
     except Exception as e:
-        print("Error in /admin/agent/evaluate/hitl/decision:", e)
+        print("Error in /admin/agent/evaluate/hitl/decision:", repr(e))
         raise HTTPException(status_code=500, detail="Internal server error")

@@ -150,25 +150,20 @@ def hitl_resume(
     """
     decision_type = decision_type.lower()
 
+    human_response: dict[str, Any]
+
     # Build the proper LangGraph Command() depending on human decision.
     if decision_type == "approve":
-        human_response = {
-                "action": "approve"
-            }
+        human_response = {"action": "approve"}
 
     elif decision_type == "reject":
-        human_response = {
-                "action": "reject"
-            }
+        human_response = {"action": "reject"}
 
     elif decision_type == "edit":
         if not edited_scores:
             raise ValueError("edited_scores must be provided when decision_type='edit'.")
-        
-        human_response = {
-            "action": "edit",
-            "data": edited_scores
-        }
+
+        human_response = {"action": "edit", "data": edited_scores}
 
     else:
         raise ValueError("decision_type must be one of: approve, reject, edit")

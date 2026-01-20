@@ -17,7 +17,7 @@ human-in-the-loop workflows, and advisor dashboards.
 Execute the full evaluation pipeline directly from the terminal:
 
 ```bash
-python -m src.main
+python -m src.main_graph.py
 ```
 
 ### 2. Launch Student UI

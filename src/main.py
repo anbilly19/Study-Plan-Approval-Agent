@@ -6,11 +6,10 @@ import warnings
 from typing import Optional
 
 from dotenv import load_dotenv
+from langgraph.graph import StateGraph
 from pydantic.json_schema import PydanticJsonSchemaWarning
 
-from langgraph.graph import StateGraph
 from .graph import build_study_plan_graph
-
 from .tools import ToolRegistry
 
 # Suppress noisy schema warnings from Pydantic when generating JSON Schema.
@@ -25,6 +24,7 @@ LLAMA_8B = "llama-3.1-8b-instant"
 
 # Base path where CSV context tables live (used by DatabaseTool).
 CONTEXT_PARENT = f"{os.getcwd()}/src/context_tables"
+
 
 def _context_paths(base: Optional[str] = None) -> dict:
     """Return a mapping from logical context names to CSV file paths.
@@ -44,11 +44,13 @@ def _context_paths(base: Optional[str] = None) -> dict:
     }
 
 
-def init_graph(model_name: str = LLAMA_70B, 
-                     context_parent: Optional[str] = None, 
-                     enable_hitl: bool = True, 
-                     scheduling_prompt = None,
-                     alignment_prompt = None) -> StateGraph:
+def init_graph(
+    model_name: str = LLAMA_70B,
+    context_parent: Optional[str] = None,
+    enable_hitl: bool = True,
+    scheduling_prompt=None,
+    alignment_prompt=None,
+) -> StateGraph:
     """Build and cache StateGraph once (reusable by FastAPI or other callers).
 
     This function:
@@ -67,16 +69,15 @@ def init_graph(model_name: str = LLAMA_70B,
     Returns:
         A shared StateGraph instance.
     """
-
     # Build DatabaseTool over CSV-backed context tables.
     df_paths = _context_paths(context_parent)
     tool_registry = ToolRegistry(df_paths)
-    
+
     # Build graph
     graph = build_study_plan_graph(
         tool_registry=tool_registry,
         model_name=model_name,
-        scheduling_prompt=scheduling_prompt, 
+        scheduling_prompt=scheduling_prompt,
         alignment_prompt=alignment_prompt,
         enable_hitl=enable_hitl,
     )

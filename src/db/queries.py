@@ -89,7 +89,7 @@ def fetch_cases():
 
 
 def fetch_courses():
-    """Build a dict like course list per department from the course and lecture tables."""
+    """Build a dict like course list per department from the course + lecture + professor tables."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
@@ -102,35 +102,31 @@ def fetch_courses():
                 c.course_id,
                 c.full_name,
                 l.credits,
-                l.day,
-                l.slot
+                (l.day || ' ' || l.slot) AS time,
+                COALESCE(p.name, 'None') AS professor,
+                COALESCE(c.seats, 0) AS seats
             FROM course AS c
             JOIN lecture AS l
               ON l.course_id = c.course_id
+            LEFT JOIN professor AS p
+              ON p.professor_id = l.professor_id
             ORDER BY c.department, c.course_id
             """
         )
 
+        rows = cur.fetchall()
+
         courses_data = {}
-
-        for row in cur.fetchall():
+        for row in rows:
             dept = row["department"] or "Unknown"
-            # Combine day + slot into a single "time" string
-            time_str = f"{row['day']} {row['slot']}"
-
-            if dept not in courses_data:
-                courses_data[dept] = []
-
-            courses_data[dept].append(
+            courses_data.setdefault(dept, []).append(
                 {
                     "code": row["course_id"],
                     "name": row["full_name"],
-                    "credits": row["credits"],
-                    "time": time_str,
-                    # DB schema currently doesn’t store these;
-                    # keep placeholders so the shape matches your dict.
-                    "professor": None,
-                    "seats": None,
+                    "credits": int(row["credits"]) if row["credits"] is not None else 0,
+                    "time": row["time"],
+                    "professor": row["professor"],
+                    "seats": int(row["seats"]) if row["seats"] is not None else 0,
                 }
             )
 
@@ -195,7 +191,9 @@ def save_approval_to_db(data: dict) -> int:
         return 0
 
     student_id = data.get("student_id")
-    if student_id is None:
+    try:
+        student_id = int(student_id) if student_id is not None else None
+    except Exception:
         student_id = 1
 
     semester = data.get("semester")
@@ -243,10 +241,13 @@ def save_approval_to_db(data: dict) -> int:
             department = db_department
             course_id = db_course_id
 
-            credits = course.get("credits")
             time_str = course.get("time")
             professor_name = course.get("professor")
+            credits = course.get("credits")
+            credits = int(credits) if credits is not None else None
+
             seats = course.get("seats")
+            seats = int(seats) if seats is not None else None
             notes = None
 
             cur.execute(
@@ -287,7 +288,7 @@ def update_case_status(case_id: str, new_status: str, notes: str | None = None) 
 
     Returns number of rows updated.
     """
-    allowed_statuses = {"Approved", "Rejected"}
+    allowed_statuses = {"Approved", "Rejected", "Under Review"}
     if new_status not in allowed_statuses:
         raise ValueError(f"Invalid status '{new_status}'. Allowed: {allowed_statuses}")
 
