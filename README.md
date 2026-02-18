@@ -37,8 +37,6 @@ streamlit run apps/ui/app_advisor.py
 ```
 ### UI Screenshots
 
-![UI_shots](./docs/diagrams/UI_1.jpeg)
-
 
 ![UI_shots](./docs/diagrams/UI_2.jpeg)
 
