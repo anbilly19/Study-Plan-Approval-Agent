@@ -4,7 +4,7 @@ A modular, agent-driven system powering student study-plan evaluation,
 human-in-the-loop workflows, and advisor dashboards.
 
 ## Complete workflow system
-![complete](./docs/diagrams/approval_complete.png)
+![complete](./docs/diagrams/management_diag.png)
 
 ## Running the Project
 
