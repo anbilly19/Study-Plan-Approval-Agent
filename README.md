@@ -35,6 +35,24 @@ Advisor/admin interface with HITL workflow controls:
 ```bash
 streamlit run apps/ui/app_advisor.py
 ```
+### UI Screenshots
+
+![UI_shots](./docs/diagrams/UI_1.jpeg)
+
+
+![UI_shots](./docs/diagrams/UI_2.jpeg)
+
+
+
+![UI_shots](./docs/diagrams/UI_3.jpeg)
+
+
+
+![UI_shots](./docs/diagrams/UI_4.jpeg)
+
+
+
+![UI_shots](./docs/diagrams/UI_5.jpeg)
 
 ### 4. Run Backend FastAPI Server
 
